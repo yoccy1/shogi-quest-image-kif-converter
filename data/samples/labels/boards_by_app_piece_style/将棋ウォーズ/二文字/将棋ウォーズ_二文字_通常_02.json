@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋ウォーズ/二文字/将棋ウォーズ_二文字_通常_02.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "white:OU",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:FU",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "empty",
+      "white:FU",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "white:GI",
+      "empty",
+      "white:FU",
+      "empty",
+      "white:FU"
+    ],
+    [
+      "empty",
+      "white:FU",
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KY",
+      "black:FU",
+      "empty",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "black:FU",
+      "black:KI",
+      "black:FU",
+      "black:FU",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:GI",
+      "black:OU",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "white:RY",
+      "empty",
+      "empty",
+      "black:KI",
+      "empty",
+      "black:KE",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 1,
+      "KI": 0,
+      "GI": 0,
+      "KE": 2,
+      "KY": 1,
+      "FU": 1
+    },
+    "white": {
+      "HI": 1,
+      "KA": 1,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 3
+    }
+  },
+  "app_name": "将棋ウォーズ",
+  "glyph_count": "two_character",
+  "glyph_count_label": "二文字",
+  "glyph_sort_source": "user_provided_2026-05-08",
+  "source_image": "../../screenshots/Screenshot_将棋ウォーズ3.png",
+  "source_sample": "Screenshot_将棋ウォーズ3",
+  "source_label": "tools/samples/labels/boards/Screenshot_将棋ウォーズ3.json",
+  "sample_kind": "regular",
+  "sample_kind_label": "通常",
+  "metadata": {
+    "piece_style_sorted_from": "tools\\samples\\labels\\boards_by_app_glyph\\将棋ウォーズ\\二文字\\将棋ウォーズ_二文字_通常_02.json",
+    "piece_style": "二文字",
+    "previous_sample": "将棋ウォーズ_二文字_通常_02"
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋クエスト/クラシック二文字駒/将棋クエスト_クラシック二文字駒_通常_05.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "empty",
+      "empty",
+      "empty",
+      "black:RY",
+      "white:KI",
+      "white:OU",
+      "empty",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:KA",
+      "white:KY",
+      "white:KI",
+      "white:GI",
+      "empty",
+      "empty"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "black:GI",
+      "white:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "black:KA",
+      "empty",
+      "white:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty",
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:NY",
+      "black:KE",
+      "empty",
+      "black:OU",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KE",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 1,
+      "GI": 1,
+      "KE": 0,
+      "KY": 0,
+      "FU": 4
+    },
+    "white": {
+      "HI": 1,
+      "KA": 0,
+      "KI": 1,
+      "GI": 1,
+      "KE": 1,
+      "KY": 0,
+      "FU": 4
+    }
+  },
+  "label_source": "recognized_board_draft_with_user_corrections"
+}

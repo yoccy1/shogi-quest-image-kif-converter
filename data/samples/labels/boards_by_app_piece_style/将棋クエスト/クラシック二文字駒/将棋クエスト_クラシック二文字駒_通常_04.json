@@ -1,0 +1,127 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋クエスト/クラシック二文字駒/将棋クエスト_クラシック二文字駒_通常_04.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:OU",
+      "white:KI",
+      "empty",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "white:KI",
+      "white:GI",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:KE",
+      "empty",
+      "white:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:KI",
+      "black:UM",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "empty",
+      "white:FU",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:OU",
+      "black:FU",
+      "white:GI",
+      "empty",
+      "black:FU",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "black:KI",
+      "black:FU",
+      "white:FU",
+      "black:FU",
+      "empty",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:RY",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:KY",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KE",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 1,
+      "KA": 1,
+      "KI": 0,
+      "GI": 0,
+      "KE": 2,
+      "KY": 0,
+      "FU": 7
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 0
+    }
+  },
+  "label_source": "recognized_board_draft_with_user_corrections"
+}

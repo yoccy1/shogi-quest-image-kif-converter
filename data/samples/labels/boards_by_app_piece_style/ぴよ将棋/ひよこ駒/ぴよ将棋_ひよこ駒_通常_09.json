@@ -1,0 +1,137 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/ぴよ将棋/ひよこ駒/ぴよ将棋_ひよこ駒_通常_09.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:RY",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "black:TO",
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "white:FU",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "empty",
+      "white:OU",
+      "white:FU",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:KA",
+      "white:GI",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "black:KI",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:NG",
+      "empty",
+      "black:FU",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "black:FU",
+      "black:KI",
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "black:KY",
+      "black:GI",
+      "empty",
+      "black:HI",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:OU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KI",
+      "empty",
+      "empty",
+      "empty"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 2,
+      "KY": 0,
+      "FU": 3
+    },
+    "white": {
+      "HI": 0,
+      "KA": 1,
+      "KI": 0,
+      "GI": 1,
+      "KE": 2,
+      "KY": 1,
+      "FU": 2
+    }
+  },
+  "metadata": {
+    "app_name": "ぴよ将棋",
+    "glyph_count": "one_character",
+    "glyph_count_label": "一文字",
+    "sample_kind": "regular",
+    "sample_kind_label": "通常",
+    "label_note": "User corrections for PiyoShogi one-character regular 09; hands specified. 72 color inferred from current recognized rook candidate as black.",
+    "piece_style_sorted_from": "tools\\samples\\labels\\boards_by_app_glyph\\ぴよ将棋\\一文字\\ぴよ将棋_一文字_通常_09.json",
+    "piece_style": "ひよこ駒",
+    "previous_sample": "ぴよ将棋_一文字_通常_09"
+  }
+}

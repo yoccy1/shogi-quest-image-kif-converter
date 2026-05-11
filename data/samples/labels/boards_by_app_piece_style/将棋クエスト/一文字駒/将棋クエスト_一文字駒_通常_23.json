@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋クエスト/一文字駒/将棋クエスト_一文字駒_通常_23.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "empty",
+      "empty",
+      "black:RY",
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "black:NG",
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "empty",
+      "empty"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "empty",
+      "white:FU",
+      "white:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:KI",
+      "empty",
+      "empty",
+      "white:OU",
+      "black:GI",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KY",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "empty",
+      "white:UM",
+      "white:NK",
+      "black:FU",
+      "black:OU",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KI",
+      "black:HI",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:GI",
+      "black:KE",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 1,
+      "KI": 1,
+      "GI": 0,
+      "KE": 1,
+      "KY": 1,
+      "FU": 1
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 6
+    }
+  },
+  "app_name": "将棋クエスト",
+  "glyph_count": "one_character",
+  "glyph_count_label": "一文字",
+  "glyph_sort_source": "user_provided_2026-05-08",
+  "source_image": "../../screenshots/Screenshot_将棋クエスト26.png",
+  "source_sample": "Screenshot_将棋クエスト26",
+  "source_label": "tools/samples/labels/boards/Screenshot_将棋クエスト26.json",
+  "sample_kind": "regular",
+  "sample_kind_label": "通常",
+  "metadata": {
+    "piece_style_sorted_from": "tools\\samples\\labels\\boards_by_app_glyph\\将棋クエスト\\一文字\\将棋クエスト_一文字_通常_23.json",
+    "piece_style": "一文字駒",
+    "previous_sample": "将棋クエスト_一文字_通常_23"
+  }
+}

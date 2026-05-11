@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shogi-gazo-desktop"
+version = "0.1.0"
+description = "Desktop CLI for recognizing shogi positions from screenshots and exporting KIF/SFEN."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "shogi_gazo_desktop contributors" }
+]
+dependencies = [
+  "pillow",
+  "numpy",
+  "opencv-python",
+  "scikit-learn",
+  "joblib",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+]
+shogivision = [
+  "torch",
+  "torchvision",
+  "onnxruntime",
+]
+
+[project.scripts]
+shogi-gazo = "shogi_gazo_desktop.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+shogi_gazo_desktop = ["assets/legacy_drawables/*.png"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

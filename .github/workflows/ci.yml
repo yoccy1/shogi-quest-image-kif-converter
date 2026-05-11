@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install ".[dev]"
+      - name: Compile package
+        run: python -m py_compile src/shogi_gazo_desktop/cli.py src/shogi_gazo_desktop/recognition.py src/shogi_gazo_desktop/export.py
+      - name: Run tests
+        run: python -m pytest -q
+      - name: Validate labels when present
+        shell: pwsh
+        run: |
+          if (Test-Path data/samples/labels/boards_by_app_piece_style) {
+            shogi-gazo validate-labels --labels data/samples/labels/boards_by_app_piece_style
+          }

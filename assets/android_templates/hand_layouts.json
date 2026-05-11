@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "layouts": [
+    {
+      "id": "wars_left_right_default",
+      "target_app": "SHOGI_WARS",
+      "areas": [
+        {
+          "color": "WHITE",
+          "side": "left",
+          "rect": [
+            0.0,
+            0.0,
+            0.17,
+            1.0
+          ],
+          "confidence": 0.55
+        },
+        {
+          "color": "BLACK",
+          "side": "right",
+          "rect": [
+            0.83,
+            0.0,
+            0.17,
+            1.0
+          ],
+          "confidence": 0.55
+        }
+      ]
+    },
+    {
+      "id": "quest_piyo_top_bottom_default",
+      "target_app": "SHOGI_QUEST",
+      "areas": [
+        {
+          "color": "WHITE",
+          "side": "top",
+          "rect": [
+            0.0,
+            0.0,
+            1.0,
+            0.13
+          ],
+          "confidence": 0.5
+        },
+        {
+          "color": "BLACK",
+          "side": "bottom",
+          "rect": [
+            0.0,
+            0.87,
+            1.0,
+            0.13
+          ],
+          "confidence": 0.5
+        }
+      ]
+    },
+    {
+      "id": "piyo_top_bottom_default",
+      "target_app": "PIYO_SHOGI",
+      "areas": [
+        {
+          "color": "WHITE",
+          "side": "top",
+          "rect": [
+            0.0,
+            0.0,
+            1.0,
+            0.13
+          ],
+          "confidence": 0.5
+        },
+        {
+          "color": "BLACK",
+          "side": "bottom",
+          "rect": [
+            0.0,
+            0.87,
+            1.0,
+            0.13
+          ],
+          "confidence": 0.5
+        }
+      ]
+    }
+  ]
+}

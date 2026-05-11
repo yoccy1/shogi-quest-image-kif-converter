@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+build/
+*.egg-info/
+
+# Local outputs
+reports/
+outputs/
+tools/out/
+*.pkl
+*.log
+
+# Large/local datasets
+data/samples/screenshots_by_app_piece_style/
+
+# Third-party local references and model weights.
+# Keep these locally until license/redistribution policy is confirmed.
+third_party/ShogiVision/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

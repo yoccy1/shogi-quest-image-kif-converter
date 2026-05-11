@@ -1,0 +1,127 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋クエスト/クラシック二文字駒/将棋クエスト_クラシック二文字駒_通常_03.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "white:KE",
+      "empty",
+      "white:FU",
+      "empty",
+      "empty",
+      "empty",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "black:RY",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "empty"
+    ],
+    [
+      "empty",
+      "white:FU",
+      "empty",
+      "white:KY",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "empty",
+      "white:GI"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "empty",
+      "white:OU",
+      "black:GI",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:GI",
+      "empty",
+      "empty",
+      "white:FU"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KI",
+      "black:FU",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:FU",
+      "empty",
+      "black:FU",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:TO",
+      "empty",
+      "black:KI",
+      "black:OU",
+      "empty",
+      "empty"
+    ],
+    [
+      "white:UM",
+      "empty",
+      "white:RY",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KE",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 0
+    },
+    "white": {
+      "HI": 0,
+      "KA": 1,
+      "KI": 1,
+      "GI": 1,
+      "KE": 1,
+      "KY": 0,
+      "FU": 6
+    }
+  },
+  "label_source": "recognized_board_draft_with_user_corrections"
+}

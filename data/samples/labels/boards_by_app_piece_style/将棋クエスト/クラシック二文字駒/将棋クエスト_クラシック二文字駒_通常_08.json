@@ -1,0 +1,127 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋クエスト/クラシック二文字駒/将棋クエスト_クラシック二文字駒_通常_08.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "white:KE",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:HI",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KI",
+      "empty",
+      "empty",
+      "white:OU"
+    ],
+    [
+      "empty",
+      "white:FU",
+      "white:KA",
+      "empty",
+      "empty",
+      "empty",
+      "black:KI",
+      "empty",
+      "white:KI"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "black:FU",
+      "empty",
+      "empty",
+      "white:FU",
+      "black:GI"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "black:FU",
+      "empty",
+      "white:FU"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:OU",
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "black:GI",
+      "empty",
+      "empty",
+      "black:FU",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:HI",
+      "empty",
+      "white:NK",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:KY",
+      "black:KE",
+      "black:KA",
+      "white:GI",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 1,
+      "GI": 0,
+      "KE": 1,
+      "KY": 0,
+      "FU": 3
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 1
+    }
+  },
+  "label_source": "recognized_board_draft_with_user_corrections"
+}

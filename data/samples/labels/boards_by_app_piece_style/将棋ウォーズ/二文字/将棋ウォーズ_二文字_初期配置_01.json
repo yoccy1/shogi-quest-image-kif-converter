@@ -1,0 +1,131 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋ウォーズ/二文字/将棋ウォーズ_二文字_初期配置_01.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "white:KE",
+      "white:GI",
+      "white:KI",
+      "white:OU",
+      "white:KI",
+      "white:GI",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "white:HI",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:KA",
+      "empty"
+    ],
+    [
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "white:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "black:KA",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:HI",
+      "empty"
+    ],
+    [
+      "black:KY",
+      "black:KE",
+      "black:GI",
+      "black:KI",
+      "black:OU",
+      "black:KI",
+      "black:GI",
+      "black:KE",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 0
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 0
+    }
+  },
+  "label_source": "implicit_initial_position",
+  "metadata": {
+    "piece_style": "二文字",
+    "previous_sample": "将棋ウォーズ_二文字_初期配置_01"
+  }
+}

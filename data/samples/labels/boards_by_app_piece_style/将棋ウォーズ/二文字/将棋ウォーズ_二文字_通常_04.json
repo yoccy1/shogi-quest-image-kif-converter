@@ -1,0 +1,133 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋ウォーズ/二文字/将棋ウォーズ_二文字_通常_04.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:OU",
+      "empty",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:RY",
+      "empty",
+      "empty",
+      "white:UM",
+      "white:GI",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "white:GI",
+      "empty",
+      "empty"
+    ],
+    [
+      "white:FU",
+      "white:FU",
+      "empty",
+      "empty",
+      "black:FU",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "white:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "black:KE",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "empty",
+      "black:KI",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:FU",
+      "black:KE"
+    ],
+    [
+      "empty",
+      "white:GI",
+      "empty",
+      "empty",
+      "empty",
+      "black:OU",
+      "black:GI",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:KY",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KI",
+      "empty",
+      "empty",
+      "white:UM"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 2,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 0
+    },
+    "white": {
+      "HI": 1,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 1,
+      "KY": 1,
+      "FU": 5
+    }
+  },
+  "metadata": {
+    "created_from": "tools\\out\\analysis_by_app_glyph_20260508\\将棋ウォーズ\\二文字\\将棋ウォーズ_二文字_通常_04\\piece_report.json",
+    "label_note": "Current recognition draft with user corrections for 17,19,42,65,66,72 and hands.",
+    "piece_style_sorted_from": "tools\\samples\\labels\\boards_by_app_glyph\\将棋ウォーズ\\二文字\\将棋ウォーズ_二文字_通常_04.json",
+    "piece_style": "二文字",
+    "previous_sample": "将棋ウォーズ_二文字_通常_04"
+  }
+}

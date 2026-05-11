@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/ぴよ将棋/ひよこ駒/ぴよ将棋_ひよこ駒_通常_02.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "white:KE",
+      "empty",
+      "empty",
+      "black:RY",
+      "empty",
+      "empty",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "black:UM",
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "empty",
+      "white:OU",
+      "empty"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "white:FU",
+      "white:KI",
+      "white:FU",
+      "empty",
+      "white:GI",
+      "white:FU",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "white:FU",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "white:FU",
+      "black:FU",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty",
+      "black:FU",
+      "white:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:KA",
+      "white:GI",
+      "black:GI",
+      "black:FU",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "black:HI",
+      "empty",
+      "black:GI",
+      "empty",
+      "empty",
+      "black:OU",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:KY",
+      "black:KE",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KE",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 1,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 2
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 1
+    }
+  },
+  "app_name": "ぴよ将棋",
+  "glyph_count": "one_character",
+  "glyph_count_label": "一文字",
+  "glyph_sort_source": "user_provided_2026-05-08",
+  "source_image": "../../screenshots/Screenshot_ぴよ将棋2.png",
+  "source_sample": "Screenshot_ぴよ将棋2",
+  "source_label": "tools/samples/labels/boards/Screenshot_ぴよ将棋2.json",
+  "sample_kind": "regular",
+  "sample_kind_label": "通常",
+  "metadata": {
+    "piece_style_sorted_from": "tools\\samples\\labels\\boards_by_app_glyph\\ぴよ将棋\\一文字\\ぴよ将棋_一文字_通常_02.json",
+    "piece_style": "ひよこ駒",
+    "previous_sample": "ぴよ将棋_一文字_通常_02"
+  }
+}

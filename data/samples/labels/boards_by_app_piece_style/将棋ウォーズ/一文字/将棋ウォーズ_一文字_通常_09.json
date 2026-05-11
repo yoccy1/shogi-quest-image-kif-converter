@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋ウォーズ/一文字/将棋ウォーズ_一文字_通常_09.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "empty",
+      "black:NY",
+      "empty",
+      "empty",
+      "empty",
+      "white:OU",
+      "empty",
+      "black:KI",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "black:TO",
+      "white:FU",
+      "white:GI",
+      "white:FU",
+      "empty",
+      "white:FU",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "white:KE",
+      "black:KE",
+      "empty",
+      "white:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:UM",
+      "black:FU",
+      "empty",
+      "black:FU",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:KE",
+      "empty",
+      "white:KI",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:KI",
+      "black:OU",
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:HI",
+      "black:KY",
+      "empty",
+      "black:GI",
+      "empty",
+      "empty",
+      "black:KY"
+    ]
+  ],
+  "app_name": "将棋ウォーズ",
+  "glyph_count": "one_character",
+  "glyph_count_label": "一文字",
+  "glyph_sort_source": "user_provided_2026-05-08",
+  "source_image": "../../screenshots/Screenshot_将棋ウォーズ12.png",
+  "source_sample": "Screenshot_将棋ウォーズ12",
+  "source_label": "tools/samples/labels/boards/Screenshot_将棋ウォーズ12.json",
+  "sample_kind": "regular",
+  "sample_kind_label": "通常",
+  "hands": {
+    "black": {
+      "HI": 1,
+      "KA": 1,
+      "KI": 0,
+      "GI": 0,
+      "KE": 1,
+      "KY": 0,
+      "FU": 7
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 1,
+      "KE": 0,
+      "KY": 0,
+      "FU": 0
+    }
+  },
+  "metadata": {
+    "piece_style_sorted_from": "tools\\samples\\labels\\boards_by_app_glyph\\将棋ウォーズ\\一文字\\将棋ウォーズ_一文字_通常_09.json",
+    "piece_style": "一文字",
+    "previous_sample": "将棋ウォーズ_一文字_通常_09"
+  }
+}

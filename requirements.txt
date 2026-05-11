@@ -1,0 +1,11 @@
+pillow
+numpy
+opencv-python
+scikit-learn
+torch
+torchvision
+onnxruntime
+joblib
+
+# Planned desktop GUI dependency. Keep commented until the GUI implementation starts.
+# PySide6
