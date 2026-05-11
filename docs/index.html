@@ -3,17 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>将棋クエスト画像KIF変換 | Shogi Quest Image KIF Converter</title>
-  <meta name="description" content="将棋クエストの一文字駒スクリーンショットを画像認識し、盤面と持ち駒を確認しながらKIF/SFENへ変換できるWindows向けHTML UIツールです。">
-  <meta name="keywords" content="将棋クエスト, KIF変換, 将棋 画像認識, 将棋 スクリーンショット, 局面認識, SFEN, Shogi Quest, Shogi Quest KIF, shogi image recognition">
+  <title>将棋クエスト KIF変換・画像認識ツール | スクリーンショットをSFENにも変換</title>
+  <meta name="description" content="将棋クエストの一文字駒スクリーンショットを画像認識し、局面をKIF/SFENへ変換するWindows向けHTML UI。盤面と持ち駒を確認してコピーできます。">
   <link rel="canonical" href="https://saka996.github.io/shogi-quest-image-kif-converter/">
-  <meta property="og:title" content="将棋クエスト画像KIF変換 | Shogi Quest Image KIF Converter">
-  <meta property="og:description" content="将棋クエストのスクリーンショットから局面を認識し、KIF/SFENへ変換するWindows向けHTML UIです。">
+  <meta property="og:title" content="将棋クエスト KIF変換・画像認識ツール">
+  <meta property="og:description" content="将棋クエストの一文字駒スクリーンショットから局面を認識し、KIF/SFENへ変換するWindows向けHTML UIです。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://saka996.github.io/shogi-quest-image-kif-converter/">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="将棋クエスト画像KIF変換 | Shogi Quest Image KIF Converter">
+  <meta property="og:image" content="https://saka996.github.io/shogi-quest-image-kif-converter/assets/html-ui-actual-2026-05-11.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="将棋クエスト KIF変換・画像認識ツール">
   <meta name="twitter:description" content="将棋クエストの一文字駒スクリーンショットを画像認識し、KIF/SFENへ変換するWindows向けHTML UIです。">
+  <meta name="twitter:image" content="https://saka996.github.io/shogi-quest-image-kif-converter/assets/html-ui-actual-2026-05-11.png">
   <style>
     :root {
       color-scheme: light;
@@ -45,6 +47,16 @@
     .lead {
       font-size: 1.12rem;
       max-width: 760px;
+    }
+    .screenshot {
+      display: block;
+      width: 100%;
+      max-width: 920px;
+      height: auto;
+      margin: 28px 0 8px;
+      border: 1px solid #dfe3ea;
+      border-radius: 8px;
+      background: #fff;
     }
     .actions {
       display: flex;
@@ -98,6 +110,9 @@
     "url": "https://saka996.github.io/shogi-quest-image-kif-converter/",
     "codeRepository": "https://github.com/saka996/shogi-quest-image-kif-converter",
     "downloadUrl": "https://github.com/saka996/shogi-quest-image-kif-converter/archive/refs/heads/main.zip",
+    "image": "https://saka996.github.io/shogi-quest-image-kif-converter/assets/html-ui-actual-2026-05-11.png",
+    "inLanguage": "ja",
+    "isAccessibleForFree": true,
     "programmingLanguage": "Python",
     "license": "https://github.com/saka996/shogi-quest-image-kif-converter/blob/main/LICENSE",
     "offers": {
@@ -111,6 +126,7 @@
   {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    "inLanguage": "ja",
     "mainEntity": [
       {
         "@type": "Question",
@@ -143,11 +159,12 @@
 <body>
   <main>
     <section class="hero">
-      <h1>将棋クエスト画像KIF変換</h1>
+      <h1>将棋クエスト KIF変換・画像認識ツール</h1>
       <p class="lead">
         <strong>Shogi Quest Image KIF Converter</strong> は、将棋クエストの一文字駒スクリーンショットから局面を認識し、
         盤面と持ち駒を確認しながら <strong>KIF</strong> / <strong>SFEN</strong> / JSON へ変換するWindows向けの非公式ツールです。
       </p>
+      <img class="screenshot" src="assets/html-ui-actual-2026-05-11.png" alt="将棋クエストのスクリーンショットを画像認識してKIF/SFENへ変換するHTML UI画面" loading="eager">
       <div class="actions">
         <a class="button" href="https://github.com/saka996/shogi-quest-image-kif-converter">GitHubでダウンロード</a>
         <a class="button secondary" href="https://github.com/saka996/shogi-quest-image-kif-converter#%E3%81%AF%E3%81%98%E3%82%81%E3%81%A6%E4%BD%BF%E3%81%86%E6%89%8B%E9%A0%86html-ui">使い方を見る</a>
@@ -155,7 +172,7 @@
     </section>
 
     <section>
-      <h2>できること</h2>
+      <h2>将棋クエストの画像認識でできること</h2>
       <div class="grid">
         <div class="panel">将棋クエストのスマホスクリーンショットを読み込む</div>
         <div class="panel">盤面、先手持ち駒、後手持ち駒をHTML UIで確認する</div>
@@ -164,7 +181,7 @@
     </section>
 
     <section>
-      <h2>使い方</h2>
+      <h2>スクリーンショットをKIF/SFENへ変換する使い方</h2>
       <ol>
         <li>GitHubからZIPをダウンロードして展開します。</li>
         <li>初回だけ <code>py -m pip install -e .</code> を実行します。</li>
@@ -190,6 +207,16 @@
       <h2>主な用途</h2>
       <p>将棋クエストのスクリーンショットから局面を保存したいとき、将棋アプリや棋譜管理ソフトに局面を移したいとき、スマホで撮った対局画面をKIF/SFENとして確認したいときに使えます。</p>
       <p class="note">このツールはShogi Questの公式アプリではありません。</p>
+    </section>
+
+    <section>
+      <h2>よくある質問</h2>
+      <h3>将棋クエストのスクリーンショットをKIFに変換できますか？</h3>
+      <p>将棋クエストの一文字駒スクリーンショットを読み込み、盤面と持ち駒を確認しながらKIFまたはSFENに変換できます。</p>
+      <h3>スマホ以外の画像にも対応していますか？</h3>
+      <p>公開時点の主な対象は、スマホで撮影した将棋クエスト一文字駒のスクリーンショットです。確認済み機種はPixel 7aのみです。</p>
+      <h3>KIFを他アプリに取り込む前に何を確認すればよいですか？</h3>
+      <p>HTML UIで盤上の駒配置、先手の持ち駒、後手の持ち駒、手番が元画像と一致していることを確認してください。</p>
     </section>
 
     <section>

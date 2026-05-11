@@ -1,18 +1,18 @@
-# 将棋クエスト画像KIF変換 / Shogi Quest Image KIF Converter
+# 将棋クエスト KIF変換・画像認識ツール / Shogi Quest Image KIF Converter
 
-将棋クエストの一文字駒スクリーンショットを画像認識し、局面をKIF / SFEN / JSONへ変換するWindows向けの非公式ツールです。ブラウザで使えるHTML UIから画像を選択し、盤面と持ち駒を目視確認してからKIFをコピーできます。
+将棋クエストの一文字駒スクリーンショットを画像認識し、将棋の局面をKIF / SFEN / JSONへ変換するWindows向けの非公式ツールです。ブラウザで使えるHTML UIから画像を選択し、盤面と持ち駒を目視確認してからKIFをコピーできます。
 
-検索用の主な用途は「将棋クエスト 画像認識」「将棋クエスト KIF 変換」「将棋 スクリーンショット 局面認識」「Shogi Quest screenshot to KIF」です。
+将棋クエストの対局画面を棋譜管理ソフトや将棋アプリに移したいとき、スクリーンショットから局面KIFを作りたいとき、SFEN形式で局面を保存したいときに使えます。
 
 Project page: https://saka996.github.io/shogi-quest-image-kif-converter/
 
 ## 画面イメージ
 
-![実際のHTML UI画面](docs/assets/html-ui-actual-2026-05-11.png)
+![将棋クエストのスクリーンショットを画像認識してKIF/SFENへ変換するHTML UI画面](docs/assets/html-ui-actual-2026-05-11.png)
 
 左に元画像、中央に認識結果、右にKIF/SFENが表示されます。盤面のマスや持ち駒をクリックすると、元画像のどの位置と対応しているか確認できます。
 
-## はじめて使う手順（HTML UI）
+## 将棋クエストのスクリーンショットをKIF/SFENへ変換する手順（HTML UI）
 
 将棋クエスト一文字駒のスクリーンショットを、ブラウザ画面で確認しながらKIF/SFENに変換する手順です。Windowsでは `start_kif_ui.cmd` をダブルクリックして使います。
 
