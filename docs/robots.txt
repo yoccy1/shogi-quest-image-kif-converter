@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://saka996.github.io/shogi-quest-kif-converter/sitemap.xml

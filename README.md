@@ -1,8 +1,10 @@
-# shogi-gazo-desktop
+# 将棋クエストKIF変換 / Shogi Quest KIF Converter
 
-将棋アプリのスクリーンショットから局面を認識し、JSON / SFEN / KIF形式で出力するデスクトップ向けPython CLIです。
+将棋クエストの一文字駒スクリーンショットを画像認識し、局面をKIF / SFEN / JSONへ変換するWindows向けの非公式ツールです。ブラウザで使えるHTML UIから画像を選択し、盤面と持ち駒を目視確認してからKIFをコピーできます。
 
-v1ではCLIを中心に公開します。画像を選んで確認できるローカルHTML UIも同梱しています。ShogiVision連携は今後の任意機能として扱います。
+検索用の主な用途は「将棋クエスト 画像認識」「将棋クエスト KIF 変換」「将棋 スクリーンショット 局面認識」「Shogi Quest screenshot to KIF」です。
+
+Project page: https://saka996.github.io/shogi-quest-kif-converter/
 
 ## はじめて使う手順（HTML UI）
 
@@ -236,7 +238,7 @@ python -m pytest tests
 
 # English Version
 
-`shogi-gazo-desktop` is a Windows-friendly Python tool that recognizes a shogi position from a screenshot and exports the result as JSON, SFEN, or KIF.
+`Shogi Quest KIF Converter` is an unofficial Windows-friendly Python tool that recognizes a shogi position from a Shogi Quest one-character-piece screenshot and exports the result as JSON, SFEN, or KIF.
 
 The easiest way to use it is the local HTML UI. You select or paste a screenshot, compare the recognized board and captured pieces with the original image, then copy KIF or SFEN.
 

@@ -22,11 +22,11 @@ if %ERRORLEVEL% EQU 0 (
   set "PYTHON_CMD=python"
 )
 
-echo shogi-gazo-desktop image analysis UI
+echo Shogi Quest KIF Converter
 echo.
 echo Browser will open: %UI_URL%
-echo Close this window to stop the local UI server.
 echo To stop: press Ctrl+C in this window, then press Y and Enter.
+echo You can also close this black window with the X button.
 echo.
 
 start "" powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2; Start-Process '%UI_URL%'"

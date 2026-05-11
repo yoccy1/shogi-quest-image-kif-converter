@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "shogi-gazo-desktop"
 version = "0.1.0"
-description = "Desktop CLI for recognizing shogi positions from screenshots and exporting KIF/SFEN."
+description = "Windows HTML UI and CLI for converting Shogi Quest screenshots to KIF/SFEN."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
