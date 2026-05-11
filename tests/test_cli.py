@@ -33,7 +33,8 @@ def test_filter_report_paths_by_parent_name() -> None:
 
 def test_hand_inventory_normalization_skips_unresolved_or_unknown_board() -> None:
     assert not should_normalize_hands_from_inventory(
-        {"constraint_postprocess": {"unresolved": [{"reason": "nifu"}]}, "cells": []}
+        {"constraint_postprocess": {"unresolved": [{"reason": "dead_end"}]}, "cells": []}
     )
+    assert should_normalize_hands_from_inventory({"constraint_postprocess": {"unresolved": [{"reason": "nifu"}]}, "cells": []})
     assert not should_normalize_hands_from_inventory({"cells": [{"state": "unknown"}]})
     assert should_normalize_hands_from_inventory({"constraint_postprocess": {"unresolved": []}, "cells": [{"state": "empty"}]})

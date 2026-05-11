@@ -49,6 +49,26 @@ def main(argv: list[str] | None = None) -> int:
     review.add_argument("--html", type=Path)
     review.add_argument("--include-hands", action="store_true")
 
+    analysis_html = sub.add_parser("analysis-html", help="Create a static analysis HTML for recognition reports.")
+    analysis_html.add_argument("run_dir", type=Path)
+    analysis_html.add_argument("--labels", type=Path, default=DEFAULT_LABELS_DIR)
+    analysis_html.add_argument("--no-labels", action="store_true")
+    analysis_html.add_argument("--evaluation", type=Path)
+    analysis_html.add_argument("--html", type=Path)
+    analysis_html.add_argument("--include-hands", action="store_true")
+    analysis_html.add_argument("--low-confidence", type=float, default=0.55)
+
+    kif_ui = sub.add_parser("kif-ui", help="Start a local HTML UI for selecting an image and exporting KIF.")
+    kif_ui.add_argument("--host", default="127.0.0.1")
+    kif_ui.add_argument("--port", type=int, default=8765)
+    kif_ui.add_argument("--out", type=Path, default=DEFAULT_OUTPUTS_DIR / "kif_ui")
+    kif_ui.add_argument("--model", type=Path, default=DEFAULT_MODEL_PATH)
+    kif_ui.add_argument("--screenshots-dir", type=Path, default=DEFAULT_SCREENSHOTS_DIR)
+    kif_ui.add_argument("--labels", type=Path, default=DEFAULT_LABELS_DIR)
+    kif_ui.add_argument("--calibration-dir", type=Path)
+    kif_ui.add_argument("--no-hands", action="store_true", help="Do not read captured pieces in the UI recognizer.")
+    kif_ui.add_argument("--no-train", action="store_true", help="Fail instead of training a model when --model is missing.")
+
     evaluate = sub.add_parser("evaluate", help="Evaluate recognized piece_report.json files against labels.")
     evaluate.add_argument("run_dir", type=Path)
     evaluate.add_argument("--labels", type=Path, default=DEFAULT_LABELS_DIR)
@@ -74,6 +94,10 @@ def main(argv: list[str] | None = None) -> int:
             return command_train_model(args)
         if args.command == "review":
             return command_review(args)
+        if args.command == "analysis-html":
+            return command_analysis_html(args)
+        if args.command == "kif-ui":
+            return command_kif_ui(args)
         if args.command == "evaluate":
             return command_evaluate(args)
         if args.command == "validate-labels":
@@ -199,6 +223,43 @@ def command_review(args: argparse.Namespace) -> int:
     html = args.html or args.run_dir / "visual_review.html"
     write_visual_review(args.run_dir, args.labels, html, include_hands=args.include_hands)
     print(str(html))
+    return 0
+
+
+def command_analysis_html(args: argparse.Namespace) -> int:
+    ensure_tools_on_path()
+    from make_image_analysis_html import write_image_analysis_html
+
+    html = args.html or args.run_dir / "image_analysis.html"
+    write_image_analysis_html(
+        args.run_dir,
+        labels_dir=None if args.no_labels else args.labels,
+        out_path=html,
+        evaluation_path=args.evaluation,
+        include_hands=args.include_hands,
+        low_confidence=args.low_confidence,
+    )
+    print(str(html))
+    return 0
+
+
+def command_kif_ui(args: argparse.Namespace) -> int:
+    ensure_tools_on_path()
+    from serve_image_kif_ui import KifUiConfig, serve_kif_ui
+
+    serve_kif_ui(
+        KifUiConfig(
+            host=args.host,
+            port=args.port,
+            out_dir=args.out,
+            model_path=args.model,
+            screenshots_dir=args.screenshots_dir,
+            labels_dir=args.labels,
+            calibration_dir=args.calibration_dir,
+            include_hands=not args.no_hands,
+            train_if_missing=not args.no_train,
+        )
+    )
     return 0
 
 

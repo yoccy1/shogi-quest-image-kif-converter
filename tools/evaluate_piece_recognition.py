@@ -174,6 +174,7 @@ def evaluate_one(
     errors = []
     high_confidence_errors = []
     top3_misses = []
+    error_categories = Counter()
 
     for expected in labels["cells"]:
         if expected["state"] == "unknown":
@@ -225,6 +226,10 @@ def evaluate_one(
         if expected["state"] == "empty":
             is_exact = actual.get("state") == "empty"
         if not is_exact:
+            score = top1.get("score") if top1 else actual.get("confidence")
+            is_high_confidence = isinstance(score, (int, float)) and score >= high_confidence_threshold
+            category = board_error_category(actual, expected_key, top3_keys, is_high_confidence)
+            error_categories[category] += 1
             entry = {
                 "square": expected["square"],
                 "row": expected["row"],
@@ -234,6 +239,13 @@ def evaluate_one(
                 "predicted_top1": predicted_key,
                 "confirmed": identity(actual.get("color"), actual.get("piece")) if actual.get("state") == "piece" else actual.get("state"),
                 "confidence": actual.get("confidence"),
+                "diagnostic_category": category,
+                "postprocess_reason": actual.get("postprocess_reason"),
+                "postprocess_history": actual.get("postprocess_history", []),
+                "solver_changed": any(
+                    (item.get("reason") or "").startswith("global_solver")
+                    for item in actual.get("postprocess_history", [])
+                ) or actual.get("postprocess_reason") == "global_solver",
                 "top3": [
                     {
                         "identity": candidate_key(candidate),
@@ -244,8 +256,7 @@ def evaluate_one(
                 ],
             }
             errors.append(entry)
-            score = top1.get("score") if top1 else actual.get("confidence")
-            if isinstance(score, (int, float)) and score >= high_confidence_threshold:
+            if is_high_confidence:
                 high_confidence_errors.append(entry)
 
     hand_result = evaluate_hands(report, labels) if include_hands else None
@@ -276,9 +287,15 @@ def evaluate_one(
             "high_confidence_errors": len(high_confidence_errors),
             "hand_errors": hand_result["errors"] if hand_result else 0,
             "leak_errors": len(leak_errors),
+            "top3_inside_errors": error_categories["top3内"],
+            "top3_outside_errors": error_categories["top3外"],
+            "unknown_errors": error_categories["unknown"],
+            "postprocess_changed_errors": sum(1 for item in errors if item.get("postprocess_reason")),
+            "solver_changed_errors": sum(1 for item in errors if item.get("solver_changed")),
         },
         "hands": hand_result,
         "leak_errors": leak_errors,
+        "error_categories": dict(error_categories),
         "confusion_matrix": {expected: dict(predicted) for expected, predicted in sorted(confusion.items())},
         "piece_confusion_matrix": {expected: dict(predicted) for expected, predicted in sorted(piece_confusion.items())},
         "errors": errors,
@@ -286,6 +303,21 @@ def evaluate_one(
         "top3_misses": top3_misses,
     }
     return result
+
+
+def board_error_category(
+    actual: dict[str, Any],
+    expected_key: str,
+    top3_keys: Sequence[str],
+    is_high_confidence: bool,
+) -> str:
+    if actual.get("state") == "unknown":
+        return "unknown"
+    if is_high_confidence:
+        return "高信頼誤認"
+    if expected_key in top3_keys:
+        return "top3内"
+    return "top3外"
 
 
 def leak_guard_errors(
@@ -538,6 +570,11 @@ def aggregate(results: list[dict[str, Any]]) -> dict[str, Any]:
         totals["high_confidence_errors"] += metrics["high_confidence_errors"]
         totals["hand_errors"] += metrics.get("hand_errors", 0)
         totals["leak_errors"] += metrics.get("leak_errors", 0)
+        totals["top3_inside_errors"] += metrics.get("top3_inside_errors", 0)
+        totals["top3_outside_errors"] += metrics.get("top3_outside_errors", 0)
+        totals["unknown_errors"] += metrics.get("unknown_errors", 0)
+        totals["postprocess_changed_errors"] += metrics.get("postprocess_changed_errors", 0)
+        totals["solver_changed_errors"] += metrics.get("solver_changed_errors", 0)
 
     true_piece = totals["true_piece"]
     true_empty = totals["true_empty"]
@@ -560,6 +597,11 @@ def aggregate(results: list[dict[str, Any]]) -> dict[str, Any]:
         "high_confidence_errors": totals["high_confidence_errors"],
         "hand_errors": totals["hand_errors"],
         "leak_errors": totals["leak_errors"],
+        "top3_inside_errors": totals["top3_inside_errors"],
+        "top3_outside_errors": totals["top3_outside_errors"],
+        "unknown_errors": totals["unknown_errors"],
+        "postprocess_changed_errors": totals["postprocess_changed_errors"],
+        "solver_changed_errors": totals["solver_changed_errors"],
     }
 
 

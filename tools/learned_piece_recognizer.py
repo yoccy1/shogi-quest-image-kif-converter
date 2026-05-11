@@ -1547,6 +1547,11 @@ def apply_piece_constraints(
         apply_rook_bishop_presence_constraints(cells, limits, report)
     apply_piece_count_limits(cells, limits, report)
     apply_king_constraints(cells, report)
+    apply_global_constraint_rerank(cells, soft_hands, report, target_family)
+    apply_quest_onechar_promoted_lance_inventory_tiebreak(cells, report, target_family)
+    apply_quest_onechar_nifu_color_tiebreak(cells, report, target_family)
+    apply_quest_onechar_promoted_lance_pair_tiebreak(cells, report, target_family)
+    apply_wars_onechar_short_piece_tiebreak(cells, report, target_family)
     apply_soft_inventory_beam(cells, soft_hands, report, target_family)
     apply_same_piece_color_tiebreak(cells, report)
     report["applied"] = bool(report["changes"])
@@ -1706,6 +1711,499 @@ def candidate_allowed_for_beam(
     return True
 
 
+def apply_global_constraint_rerank(
+    cells: list[dict[str, Any]],
+    hands: dict[str, dict[str, int]] | None,
+    report: dict[str, Any],
+    target_family: str = "",
+) -> None:
+    started = time.perf_counter()
+    deadline = started + 8.0
+    target = board_inventory_limits(hands)
+    has_soft_target = hands is not None
+    variables = global_rerank_variables(cells, target, has_soft_target, target_family)
+    if not variables:
+        report["global_solver"] = {
+            "applied": 0,
+            "variables": 0,
+            "timeout": False,
+            "timeout_ms": 8000,
+        }
+        return
+
+    start_counts = board_counts(cells)
+    start_kings = king_counts(cells)
+    start_pawns = pawn_counts(cells)
+    start_penalty = global_constraint_penalty(start_counts, target, start_kings, start_pawns, has_soft_target)
+    beam = [
+        {
+            "score": 0.0,
+            "penalty": start_penalty,
+            "choices": [],
+            "counts": dict(start_counts),
+            "kings": dict(start_kings),
+            "pawns": Counter(start_pawns),
+        }
+    ]
+    beam_width = 192 if target_family == "将棋ウォーズ:一文字" else 96
+    timed_out = False
+    for cell, options in variables:
+        if time.perf_counter() > deadline:
+            timed_out = True
+            break
+        next_beam = []
+        for state in beam:
+            for candidate, local_delta in options:
+                counts = dict(state["counts"])
+                kings = dict(state["kings"])
+                pawns = Counter(state["pawns"])
+                apply_soft_count_transition(cell, candidate, counts, kings, pawns)
+                penalty = global_constraint_penalty(counts, target, kings, pawns, has_soft_target)
+                penalty_gain = float(state["penalty"]) - penalty
+                next_beam.append(
+                    {
+                        "score": float(state["score"]) + local_delta + penalty_gain * 0.92,
+                        "penalty": penalty,
+                        "choices": [*state["choices"], (cell, candidate)],
+                        "counts": counts,
+                        "kings": kings,
+                        "pawns": pawns,
+                    }
+                )
+        if not next_beam:
+            continue
+        beam = sorted(next_beam, key=lambda item: (float(item["score"]), -float(item["penalty"])), reverse=True)[:beam_width]
+    if not beam:
+        return
+
+    best = beam[0]
+    second = beam[1] if len(beam) > 1 else None
+    best_score = float(best["score"])
+    best_penalty = float(best["penalty"])
+    penalty_gain = start_penalty - best_penalty
+    min_gain = 0.08 if target_family == "将棋ウォーズ:一文字" else (0.16 if has_soft_target else 0.22)
+    should_apply = (penalty_gain >= min_gain and best_score >= -0.18) or (best_score >= 0.20 and best_penalty <= start_penalty)
+    applied = 0
+    if should_apply:
+        for cell, candidate in best["choices"]:
+            if candidate is None:
+                continue
+            if cell.get("state") == "piece" and (cell.get("color"), cell.get("piece")) == (candidate.get("color"), candidate.get("piece")):
+                continue
+            apply_candidate(cell, candidate, "global_solver", report)
+            applied += 1
+
+    second_gap = best_score - float(second["score"]) if second is not None else None
+    report["global_solver"] = {
+        "applied": applied,
+        "variables": len(variables),
+        "beam_width": beam_width,
+        "timeout": timed_out,
+        "timeout_ms": 8000,
+        "elapsed_ms": round((time.perf_counter() - started) * 1000.0, 3),
+        "start_penalty": round(start_penalty, 4),
+        "best_penalty": round(best_penalty, 4),
+        "best_score": round(best_score, 4),
+        "second_best_gap": round(second_gap, 4) if second_gap is not None else None,
+        "unique_solution": bool(second_gap is None or second_gap >= 0.035),
+    }
+
+
+def global_rerank_variables(
+    cells: list[dict[str, Any]],
+    target: dict[str, int],
+    has_soft_target: bool,
+    target_family: str,
+) -> list[tuple[dict[str, Any], list[tuple[dict[str, Any] | None, float]]]]:
+    current_counts = board_counts(cells)
+    surplus = {
+        piece
+        for piece in TOTAL_INVENTORY
+        if current_counts.get(piece, 0) > target.get(piece, TOTAL_INVENTORY.get(piece, 0))
+    }
+    deficits = {
+        piece
+        for piece in TOTAL_INVENTORY
+        if has_soft_target and current_counts.get(piece, 0) < target.get(piece, TOTAL_INVENTORY.get(piece, 0))
+    }
+    unknown_candidate_bases = {
+        base_piece(str(candidate.get("piece")))
+        for cell in cells
+        if cell.get("state") == "unknown"
+        for candidate in (cell.get("candidates") or [])[:6]
+        if float(candidate.get("score") or 0.0) >= 0.46
+    }
+    nifu_cells = {
+        (cell.get("row"), cell.get("col"))
+        for color in ("black", "white")
+        for col in range(1, 10)
+        for group in [[
+            cell
+            for cell in cells
+            if cell.get("state") == "piece"
+            and cell.get("color") == color
+            and cell.get("piece") == "FU"
+            and int(cell.get("col", 0)) == col
+        ]]
+        if len(group) > 1
+        for cell in group
+    }
+    variables = []
+    for cell in cells:
+        options = global_rerank_options(cell, surplus, deficits, nifu_cells, target_family, unknown_candidate_bases)
+        if len(options) <= 1:
+            continue
+        priority = global_rerank_priority(cell, options, surplus, deficits, nifu_cells)
+        variables.append((priority, cell, options))
+    variables.sort(key=lambda item: item[0], reverse=True)
+    limit = 18 if target_family == "将棋ウォーズ:一文字" else 14
+    return [(cell, options) for _, cell, options in variables[:limit]]
+
+
+def global_rerank_options(
+    cell: dict[str, Any],
+    surplus: set[str],
+    deficits: set[str],
+    nifu_cells: set[tuple[Any, Any]],
+    target_family: str = "",
+    unknown_candidate_bases: set[str] | None = None,
+) -> list[tuple[dict[str, Any] | None, float]]:
+    candidates = list(cell.get("candidates") or [])
+    if not candidates:
+        return [(None, 0.0)]
+    current_identity = (cell.get("color"), cell.get("piece")) if cell.get("state") == "piece" else (None, None)
+    current_base = base_piece(str(cell.get("piece"))) if cell.get("piece") else None
+    current_score = float(cell.get("confidence") or 0.0)
+    keep_score = 0.50 if cell.get("state") == "unknown" else current_score
+    cell_key = (cell.get("row"), cell.get("col"))
+    current_in_nifu = cell_key in nifu_cells and current_base == "FU"
+    options: list[tuple[dict[str, Any] | None, float]] = [(None, 0.0)]
+    seen: set[tuple[str, str]] = set()
+    for rank, candidate in enumerate(candidates[:8]):
+        color = str(candidate.get("color") or "")
+        piece = str(candidate.get("piece") or "")
+        if color not in {"black", "white"} or not piece:
+            continue
+        key = (color, piece)
+        if key == current_identity or key in seen:
+            continue
+        if is_dead_end_piece(color, piece, int(cell["row"])):
+            continue
+        candidate_score = float(candidate.get("score") or 0.0)
+        candidate_base = base_piece(piece)
+        score_drop = keep_score - candidate_score
+        exchange_supported = (
+            target_family == "ぴよ将棋:ひよこ駒"
+            and current_base in (unknown_candidate_bases or set())
+            and score_drop <= 0.10
+            and "position_prior" in str(candidate.get("source") or "")
+        )
+        target_supported = candidate_base in deficits and (
+            cell.get("state") == "unknown" or current_base in surplus or exchange_supported
+        )
+        relevant = (
+            cell.get("state") == "unknown"
+            or target_supported
+            or current_base in surplus
+            or current_in_nifu
+            or is_wars_global_confusion_swap(cell, candidate, target_family)
+        )
+        if not relevant:
+            continue
+        if (
+            target_family == "将棋ウォーズ:一文字"
+            and cell.get("postprocess_reason") == "global_unknown_beam"
+            and not (target_supported or current_base in surplus or current_in_nifu)
+        ):
+            continue
+        max_drop = 0.075
+        min_score = 0.50
+        if target_supported or current_base in surplus:
+            max_drop = 0.16
+            min_score = 0.45
+        if current_in_nifu and candidate_base != "FU" and (current_score < 0.72 or current_base in surplus):
+            max_drop = max(max_drop, 0.22)
+            min_score = min(min_score, 0.43)
+        if cell.get("state") == "unknown":
+            max_drop = max(max_drop, 0.05)
+            min_score = min(min_score, 0.48)
+        if is_wars_global_confusion_swap(cell, candidate, target_family):
+            max_drop = max(max_drop, 0.12)
+            min_score = min(min_score, 0.48)
+        if is_wars_unknown_major_inventory_rescue(cell, candidate, target_family):
+            max_drop = max(max_drop, 0.18)
+            min_score = min(min_score, 0.46)
+        if is_quest_onechar_promoted_lance_inventory_swap(cell, candidate, target_family):
+            max_drop = max(max_drop, 0.205)
+            min_score = min(min_score, 0.50)
+        if (
+            target_family == "将棋ウォーズ:一文字"
+            and cell.get("state") == "piece"
+            and current_score >= 0.74
+            and score_drop > 0.075
+            and not is_high_confidence_wars_inventory_swap(current_base, candidate_base, score_drop)
+        ):
+            continue
+        if candidate_score < min_score or score_drop > max_drop:
+            continue
+        local_delta = candidate_score - keep_score - rank * 0.020
+        if target_supported:
+            local_delta += 0.105
+        if current_base in surplus:
+            local_delta += 0.100
+        if current_in_nifu and candidate_base != "FU" and (current_score < 0.72 or current_base in surplus):
+            local_delta += 0.135
+        if cell.get("state") == "unknown":
+            local_delta += 0.055
+        if is_wars_global_confusion_swap(cell, candidate, target_family):
+            local_delta += 0.030
+        if is_quest_onechar_promoted_lance_inventory_swap(cell, candidate, target_family):
+            local_delta += 0.130
+        if (
+            target_family == "将棋ウォーズ:一文字"
+            and cell.get("postprocess_reason") == "global_unknown_beam"
+            and current_base in {"FU", "KY", "KE"}
+            and candidate_base in {"FU", "KY", "KE"}
+        ):
+            local_delta -= 0.100
+        options.append((candidate, local_delta))
+        seen.add(key)
+    return options
+
+
+def is_wars_global_confusion_swap(cell: dict[str, Any], candidate: dict[str, Any], target_family: str) -> bool:
+    if target_family != "将棋ウォーズ:一文字":
+        return False
+    current_base = base_piece(str(cell.get("piece"))) if cell.get("piece") else ""
+    candidate_base = base_piece(str(candidate.get("piece"))) if candidate.get("piece") else ""
+    if not current_base or not candidate_base or current_base == candidate_base:
+        return False
+    return {current_base, candidate_base} in (
+        {"FU", "KY"},
+        {"FU", "KE"},
+        {"KY", "KE"},
+        {"KI", "GI"},
+        {"KA", "HI"},
+        {"KA", "FU"},
+        {"HI", "KE"},
+    )
+
+
+def is_quest_onechar_promoted_lance_inventory_swap(
+    cell: dict[str, Any],
+    candidate: dict[str, Any],
+    target_family: str,
+) -> bool:
+    if target_family != "将棋クエスト:一文字駒":
+        return False
+    if str(cell.get("postprocess_reason") or "") != "global_unknown_beam":
+        return False
+    current_base = base_piece(str(cell.get("piece"))) if cell.get("piece") else ""
+    return (
+        current_base in {"GI", "KE"}
+        and candidate.get("color") == "white"
+        and candidate.get("piece") == "NY"
+        and float(candidate.get("score") or 0.0) >= 0.50
+    )
+
+
+def is_high_confidence_wars_inventory_swap(current_base: str | None, candidate_base: str, score_drop: float) -> bool:
+    if not current_base:
+        return False
+    if {current_base, candidate_base} == {"FU", "KY"}:
+        return score_drop <= 0.090
+    if {current_base, candidate_base} == {"KI", "GI"}:
+        return score_drop <= 0.115
+    if {current_base, candidate_base} == {"FU", "KE"}:
+        return score_drop <= 0.205
+    return False
+
+
+def global_rerank_priority(
+    cell: dict[str, Any],
+    options: Sequence[tuple[dict[str, Any] | None, float]],
+    surplus: set[str],
+    deficits: set[str],
+    nifu_cells: set[tuple[Any, Any]],
+) -> float:
+    current_base = base_piece(str(cell.get("piece"))) if cell.get("piece") else None
+    priority = max(0.0, 0.82 - float(cell.get("confidence") or 0.0))
+    if cell.get("state") == "unknown":
+        priority += 2.5
+    if (cell.get("row"), cell.get("col")) in nifu_cells:
+        priority += 3.0
+    if current_base in surplus:
+        priority += 2.4
+    for candidate, _ in options[1:]:
+        if candidate is None:
+            continue
+        candidate_base = base_piece(str(candidate.get("piece")))
+        if candidate_base in deficits:
+            priority += 1.8
+    return priority
+
+
+def global_constraint_penalty(
+    counts: dict[str, int],
+    target: dict[str, int],
+    kings: dict[str, int],
+    pawns: Counter[tuple[str | None, int]],
+    has_soft_target: bool,
+) -> float:
+    if has_soft_target:
+        penalty = sum(max(0, counts.get(piece, 0) - target.get(piece, 0)) * 0.55 for piece in TOTAL_INVENTORY)
+    else:
+        penalty = sum(max(0, counts.get(piece, 0) - TOTAL_INVENTORY.get(piece, 0)) * 0.60 for piece in TOTAL_INVENTORY)
+    penalty += sum(abs(kings.get(color, 0) - 1) * 0.55 for color in ("black", "white"))
+    penalty += sum(max(0, count - 1) * 0.10 for (color, _), count in pawns.items() if color in {"black", "white"})
+    return penalty
+
+
+def apply_wars_onechar_short_piece_tiebreak(
+    cells: list[dict[str, Any]],
+    report: dict[str, Any],
+    target_family: str,
+) -> None:
+    if target_family != "将棋ウォーズ:一文字":
+        return
+    pawns = pawn_counts(cells)
+    for cell in cells:
+        if cell.get("state") != "piece" or cell.get("piece") not in {"FU", "KY", "KE"}:
+            continue
+        current_score = float(cell.get("confidence") or 0.0)
+        postprocess_reason = str(cell.get("postprocess_reason") or "")
+        if current_score >= 0.73 and postprocess_reason != "global_unknown_beam":
+            continue
+        for candidate in (cell.get("candidates") or [])[:3]:
+            color = str(candidate.get("color") or "")
+            piece = str(candidate.get("piece") or "")
+            if color not in {"black", "white"} or piece not in {"FU", "KY", "KE"}:
+                continue
+            if (color, piece) == (cell.get("color"), cell.get("piece")):
+                continue
+            if is_dead_end_piece(color, piece, int(cell["row"])):
+                continue
+            candidate_score = float(candidate.get("score") or 0.0)
+            score_drop = current_score - candidate_score
+            candidate_source = str(candidate.get("source") or "")
+            has_position_prior = "position_prior" in candidate_source
+            if score_drop > (0.040 if has_position_prior else 0.024):
+                continue
+            if piece == "FU" and pawns[(color, int(cell["col"]))] > 0:
+                continue
+            if piece == "FU" and cell.get("piece") == "KY" and (has_position_prior or postprocess_reason == "global_unknown_beam"):
+                old_key = (cell.get("color"), int(cell["col"]))
+                if cell.get("piece") == "FU" and pawns[old_key] > 0:
+                    pawns[old_key] -= 1
+                apply_candidate(cell, candidate, "wars_onechar_short_piece_tiebreak", report)
+                pawns[(color, int(cell["col"]))] += 1
+                break
+
+
+def apply_quest_onechar_nifu_color_tiebreak(
+    cells: list[dict[str, Any]],
+    report: dict[str, Any],
+    target_family: str,
+) -> None:
+    if target_family != "将棋クエスト:一文字駒":
+        return
+    pawns = pawn_counts(cells)
+    for cell in cells:
+        if cell.get("state") != "piece" or cell.get("piece") != "FU" or cell.get("color") not in {"black", "white"}:
+            continue
+        current_color = str(cell.get("color"))
+        current_key = (current_color, int(cell["col"]))
+        if pawns[current_key] <= 1:
+            continue
+        other_color = "white" if current_color == "black" else "black"
+        if pawns[(other_color, int(cell["col"]))] > 0:
+            continue
+        current_score = float(cell.get("confidence") or 0.0)
+        for candidate in (cell.get("candidates") or [])[:4]:
+            if candidate.get("color") != other_color or candidate.get("piece") != "FU":
+                continue
+            candidate_score = float(candidate.get("score") or 0.0)
+            if candidate_score < 0.62 or current_score - candidate_score > 0.055:
+                continue
+            if is_dead_end_piece(other_color, "FU", int(cell["row"])):
+                continue
+            pawns[current_key] -= 1
+            apply_candidate(cell, candidate, "quest_onechar_nifu_color_tiebreak", report)
+            pawns[(other_color, int(cell["col"]))] += 1
+            break
+
+
+def apply_quest_onechar_promoted_lance_inventory_tiebreak(
+    cells: list[dict[str, Any]],
+    report: dict[str, Any],
+    target_family: str,
+) -> None:
+    if target_family != "将棋クエスト:一文字駒":
+        return
+    for cell in cells:
+        if cell.get("state") != "piece" or cell.get("piece") not in {"NG", "NK"}:
+            continue
+        if str(cell.get("postprocess_reason") or "") != "global_unknown_beam":
+            continue
+        current_score = float(cell.get("confidence") or 0.0)
+        for candidate in (cell.get("candidates") or [])[:8]:
+            if candidate.get("color") != "white" or candidate.get("piece") != "NY":
+                continue
+            candidate_score = float(candidate.get("score") or 0.0)
+            if candidate_score < 0.50 or current_score - candidate_score > 0.20:
+                continue
+            apply_candidate(cell, candidate, "quest_onechar_promoted_lance_inventory_tiebreak", report)
+            break
+
+
+def apply_quest_onechar_promoted_lance_pair_tiebreak(
+    cells: list[dict[str, Any]],
+    report: dict[str, Any],
+    target_family: str,
+) -> None:
+    if target_family != "将棋クエスト:一文字駒":
+        return
+    promoted_lance_options: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
+    for cell in cells:
+        if cell.get("state") != "piece" or cell.get("piece") != "TO":
+            continue
+        current_score = float(cell.get("confidence") or 0.0)
+        for candidate in (cell.get("candidates") or [])[:8]:
+            if candidate.get("piece") != "NY":
+                continue
+            candidate_score = float(candidate.get("score") or 0.0)
+            if candidate_score < 0.49 or current_score - candidate_score > 0.025:
+                continue
+            promoted_lance_options.append((candidate_score - current_score, cell, candidate))
+            break
+    if not promoted_lance_options:
+        return
+
+    pawn_options: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
+    for cell in cells:
+        if cell.get("state") != "piece" or cell.get("piece") != "KY":
+            continue
+        current_score = float(cell.get("confidence") or 0.0)
+        for candidate in (cell.get("candidates") or [])[:6]:
+            if candidate.get("piece") != "FU" or candidate.get("color") != cell.get("color"):
+                continue
+            if is_dead_end_piece(str(candidate.get("color")), "FU", int(cell["row"])):
+                continue
+            candidate_score = float(candidate.get("score") or 0.0)
+            if candidate_score < 0.55 or current_score - candidate_score > 0.035:
+                continue
+            bonus = 0.03 if cell.get("postprocess_reason") == "global_solver" else 0.0
+            pawn_options.append((candidate_score - current_score + bonus, cell, candidate))
+            break
+    if not pawn_options:
+        return
+
+    _, lance_cell, lance_candidate = max(promoted_lance_options, key=lambda item: item[0])
+    _, pawn_cell, pawn_candidate = max(pawn_options, key=lambda item: item[0])
+    apply_candidate(lance_cell, lance_candidate, "quest_onechar_promoted_lance_pair_tiebreak", report)
+    apply_candidate(pawn_cell, pawn_candidate, "quest_onechar_promoted_lance_pair_tiebreak", report)
+
+
 def apply_soft_inventory_beam(
     cells: list[dict[str, Any]],
     hands: dict[str, dict[str, int]] | None,
@@ -1812,8 +2310,17 @@ def unsafe_soft_inventory_candidate_reason(
 ) -> str | None:
     candidate_score = float(candidate.get("score") or 0.0)
     current_score = float(cell.get("confidence") or 0.0)
+    if target_family == "将棋ウォーズ:一文字" and cell.get("postprocess_reason") in {
+        "global_solver",
+        "wars_onechar_short_piece_tiebreak",
+    }:
+        return "protected_wars_global_choice"
     if cell.get("state") == "unknown":
-        if candidate_score < 0.53 and not is_wars_unknown_major_inventory_rescue(cell, candidate, target_family):
+        if (
+            candidate_score < 0.53
+            and not is_wars_unknown_major_inventory_rescue(cell, candidate, target_family)
+            and not is_quest_onechar_unknown_tokins_rescue(cell, candidate, target_family)
+        ):
             return "low_confidence_unknown_rescue"
         return None
     if cell.get("state") != "piece":
@@ -1838,6 +2345,15 @@ def is_wars_unknown_major_inventory_rescue(cell: dict[str, Any], candidate: dict
     if piece == "TO":
         return score >= 0.52
     return False
+
+
+def is_quest_onechar_unknown_tokins_rescue(cell: dict[str, Any], candidate: dict[str, Any], target_family: str) -> bool:
+    return (
+        target_family == "将棋クエスト:一文字駒"
+        and cell.get("state") == "unknown"
+        and candidate.get("piece") == "TO"
+        and float(candidate.get("score") or 0.0) >= 0.42
+    )
 
 
 def is_wars_close_inventory_swap(cell: dict[str, Any], candidate: dict[str, Any], target_family: str) -> bool:
@@ -1905,7 +2421,8 @@ def soft_inventory_options(
         return [(None, 0.0)]
     options: list[tuple[dict[str, Any] | None, float]] = [(None, 0.0)]
     seen: set[tuple[str, str]] = set()
-    for rank, candidate in enumerate(cell.get("candidates") or []):
+    candidates = quest_onechar_owner_prior_candidates(cell, target_family)
+    for rank, candidate in enumerate(candidates):
         color = candidate.get("color")
         piece = candidate.get("piece")
         if not color or not piece:
@@ -1943,6 +2460,9 @@ def soft_inventory_options(
         if is_wars_unknown_major_inventory_rescue(cell, candidate, target_family) and candidate_base in deficits:
             max_drop = max(max_drop, 0.12)
             min_score = 0.46
+        if is_quest_onechar_unknown_tokins_rescue(cell, candidate, target_family) and candidate_base in deficits:
+            max_drop = max(max_drop, 0.12)
+            min_score = 0.42
         if candidate_score < min_score or score_drop > max_drop:
             continue
         local_delta = candidate_score - current_score - rank * 0.025
@@ -1955,6 +2475,31 @@ def soft_inventory_options(
         options.append((candidate, local_delta))
         seen.add(key)
     return options
+
+
+def quest_onechar_owner_prior_candidates(cell: dict[str, Any], target_family: str) -> list[dict[str, Any]]:
+    candidates = list(cell.get("candidates") or [])
+    if target_family != "将棋クエスト:一文字駒" or cell.get("state") != "unknown":
+        return candidates
+    to_candidate = next(
+        (
+            candidate
+            for candidate in candidates
+            if candidate.get("piece") == "TO" and float(candidate.get("score") or 0.0) >= 0.42
+        ),
+        None,
+    )
+    if to_candidate is None:
+        return candidates
+    row = int(cell.get("row") or 0)
+    preferred_color = "white" if row >= 7 else ("black" if row <= 3 else "")
+    if not preferred_color or any(candidate.get("color") == preferred_color and candidate.get("piece") == "TO" for candidate in candidates):
+        return candidates
+    synthetic = dict(to_candidate)
+    synthetic["color"] = preferred_color
+    synthetic["score"] = float(to_candidate.get("score") or 0.0) + 0.0002
+    synthetic["source"] = f"{to_candidate.get('source') or 'unknown'}+quest_onechar_owner_prior"
+    return [synthetic, *candidates]
 
 
 def apply_same_piece_color_tiebreak(cells: list[dict[str, Any]], report: dict[str, Any]) -> None:
@@ -2097,6 +2642,8 @@ def hand_report_is_reliable(hand_report: dict[str, Any] | None) -> bool:
 def soft_inventory_hands_from_hand_report(hand_report: dict[str, Any] | None) -> dict[str, dict[str, int]] | None:
     if not hand_report:
         return None
+    target_family = str(hand_report.get("target_family") or "")
+    min_soft_confidence = 0.60 if target_family == "将棋ウォーズ:一文字" else 0.68
     hands = {color: {piece: 0 for piece in HAND_PIECES} for color in ("black", "white")}
     used = 0
     for entry in hand_report.get("pieces") or []:
@@ -2115,11 +2662,124 @@ def soft_inventory_hands_from_hand_report(hand_report: dict[str, Any] | None) ->
         )
         if count_source == "digit" and max(confidence, digit_confidence) >= 0.60:
             pass
-        elif confidence < 0.68:
+        elif confidence < min_soft_confidence:
             continue
         hands[owner][piece] += count
         used += count
+    if used and target_family == "将棋ウォーズ:一文字":
+        apply_wars_onechar_soft_hand_repairs(hand_report, hands)
+    if used and target_family == "将棋クエスト:一文字駒":
+        apply_quest_onechar_soft_hand_repairs(hand_report, hands)
     return hands if used else None
+
+
+def apply_wars_onechar_soft_hand_repairs(hand_report: dict[str, Any], hands: dict[str, dict[str, int]]) -> None:
+    evidence = hand_evidence_scores(hand_report)
+    white_fu_digit_confidence = max(
+        (
+            float(digit.get("confidence") or 0.0)
+            for entry in hand_report.get("pieces") or []
+            if entry.get("owner") == "white"
+            and entry.get("piece") == "FU"
+            and str(entry.get("count_source") or "") == "digit"
+            and int(entry.get("count") or 0) >= 3
+            for digit in entry.get("digits") or []
+        ),
+        default=0.0,
+    )
+    if (
+        hands["white"]["KY"] == 0
+        and hands["white"]["FU"] >= 3
+        and white_fu_digit_confidence < 0.84
+        and evidence.get(("white", "KY"), 0.0) >= 0.50
+        and evidence.get(("white", "FU"), 0.0) - evidence.get(("white", "KY"), 0.0) <= 0.38
+    ):
+        hands["white"]["FU"] -= 1
+        hands["white"]["KY"] += 1
+
+
+def hand_evidence_scores(hand_report: dict[str, Any]) -> dict[tuple[str, str], float]:
+    scores: dict[tuple[str, str], float] = {}
+
+    def add(owner: Any, piece: Any, score: Any, discount: float = 0.0) -> None:
+        if owner not in {"black", "white"} or piece not in HAND_PIECE_SET:
+            return
+        try:
+            value = float(score) - discount
+        except (TypeError, ValueError):
+            return
+        key = (str(owner), str(piece))
+        scores[key] = max(scores.get(key, 0.0), value)
+
+    for entry in hand_report.get("pieces") or []:
+        add(entry.get("owner"), entry.get("piece"), entry.get("confidence"))
+        for candidate_set in entry.get("candidate_sets") or []:
+            for candidate in candidate_set.get("candidates") or []:
+                add(candidate.get("color"), candidate.get("piece"), candidate.get("score"), 0.025)
+    for item in hand_report.get("unknown") or []:
+        for candidate in item.get("candidates") or []:
+            add(candidate.get("color"), candidate.get("piece"), candidate.get("score"), 0.015)
+    return scores
+
+
+def apply_quest_onechar_soft_hand_repairs(hand_report: dict[str, Any], hands: dict[str, dict[str, int]]) -> None:
+    evidence = hand_evidence_scores(hand_report)
+    white_ke_digit_confidence = max(
+        (
+            float(digit.get("confidence") or 0.0)
+            for entry in hand_report.get("pieces") or []
+            if entry.get("owner") == "white"
+            and entry.get("piece") == "KE"
+            and str(entry.get("count_source") or "") == "digit"
+            and int(entry.get("count") or 0) >= 3
+            for digit in entry.get("digits") or []
+        ),
+        default=0.0,
+    )
+    if (
+        hands["white"]["KE"] >= 3
+        and hands["white"]["GI"] <= 1
+        and white_ke_digit_confidence < 0.95
+        and evidence.get(("white", "GI"), 0.0) >= 0.56
+        and evidence.get(("white", "KE"), 0.0) - evidence.get(("white", "GI"), 0.0) <= 0.16
+    ):
+        move = min(2, hands["white"]["KE"])
+        hands["white"]["KE"] -= move
+        hands["white"]["GI"] += move
+    if (
+        hands["white"]["FU"] >= 3
+        and hands["white"]["GI"] == 1
+        and evidence.get(("white", "GI"), 0.0) < 0.72
+        and evidence.get(("white", "FU"), 0.0) >= 0.70
+    ):
+        hands["white"]["GI"] = 0
+    sanitization = hand_report.get("inventory_sanitization") or {}
+    completion = hand_report.get("inventory_completion") or {}
+    removed_white_gi = any(
+        item.get("owner") == "white"
+        and item.get("piece") == "GI"
+        and int(item.get("removed") or 0) > 0
+        and float(item.get("confidence") or 0.0) <= 0.50
+        for item in sanitization.get("changes") or []
+    )
+    low_confidence_white_ky_completion = any(
+        item.get("owner") == "white"
+        and item.get("piece") == "KY"
+        and float(item.get("score") or 0.0) <= 0.54
+        for item in completion.get("changes") or []
+    )
+    if removed_white_gi and low_confidence_white_ky_completion and hands["white"]["KY"] > 0:
+        hands["white"]["KY"] -= 1
+        hands["white"]["GI"] += 1
+    low_confidence_black_ke_completion = any(
+        item.get("owner") == "black"
+        and item.get("piece") == "KE"
+        and float(item.get("score") or 0.0) <= 0.56
+        for item in completion.get("changes") or []
+    )
+    if removed_white_gi and low_confidence_black_ke_completion and hands["black"]["KE"] > 0:
+        hands["black"]["KE"] -= 1
+        hands["white"]["GI"] += 1
 
 
 def board_inventory_limits(hands: dict[str, dict[str, int]] | None) -> dict[str, int]:
@@ -2431,19 +3091,22 @@ def is_dead_end_piece(color: str | None, piece: str | None, row: int) -> bool:
 
 def apply_candidate(cell: dict[str, Any], candidate: dict[str, Any], reason: str, report: dict[str, Any]) -> None:
     before = identity(cell.get("color"), cell.get("piece")) if cell.get("state") == "piece" else str(cell.get("state"))
+    after = identity(candidate.get("color"), candidate.get("piece"))
     cell["state"] = "piece"
     cell["color"] = candidate.get("color")
     cell["piece"] = candidate.get("piece")
     cell["best_piece"] = candidate.get("piece")
     cell["confidence"] = candidate.get("score", cell.get("confidence", 0.0))
     cell["ambiguous"] = False
+    cell["postprocess_reason"] = reason
+    cell.setdefault("postprocess_history", []).append({"reason": reason, "from": before, "to": after})
     reorder_candidates(cell, candidate)
     report["changes"].append(
         {
             "square": cell.get("square"),
             "reason": reason,
             "from": before,
-            "to": identity(cell.get("color"), cell.get("piece")),
+            "to": after,
         },
     )
 
@@ -2457,6 +3120,8 @@ def mark_unknown(cell: dict[str, Any], reason: str, report: dict[str, Any]) -> N
     cell["confidence"] = 0.0
     cell["ambiguous"] = True
     cell["candidates"] = []
+    cell["postprocess_reason"] = reason
+    cell.setdefault("postprocess_history", []).append({"reason": reason, "from": before, "to": "unknown"})
     report["changes"].append({"square": cell.get("square"), "reason": reason, "from": before, "to": "unknown"})
 
 

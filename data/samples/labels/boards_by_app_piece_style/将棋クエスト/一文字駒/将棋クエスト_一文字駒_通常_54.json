@@ -1,0 +1,138 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋クエスト/一文字駒/将棋クエスト_一文字駒_通常_54.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "white:KE",
+      "empty",
+      "empty",
+      "black:HI",
+      "white:GI",
+      "empty",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:OU",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:FU",
+      "empty",
+      "black:KA",
+      "white:FU",
+      "white:FU",
+      "white:KI",
+      "empty"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "empty",
+      "white:FU",
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "white:FU"
+    ],
+    [
+      "empty",
+      "white:FU",
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "white:KE",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "black:FU",
+      "black:GI",
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "black:RY",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "black:KI",
+      "black:OU",
+      "black:KI",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:KY",
+      "black:KE",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 1,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 2
+    },
+    "white": {
+      "HI": 0,
+      "KA": 1,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 2
+    }
+  },
+  "app_name": "将棋クエスト",
+  "glyph_count": "one_character",
+  "glyph_count_label": "一文字",
+  "glyph_sort_source": "user_reviewed_2026-05-11",
+  "sample_kind": "regular",
+  "sample_kind_label": "通常",
+  "metadata": {
+    "piece_style": "一文字駒",
+    "review_source": "outputs/quest_onechar_requested_44_63_fix2/visual_review.html",
+    "review_assumption": "User confirmed all unmentioned cells and hands are correct; noted corrections were incorporated before labeling.",
+    "reviewed_at": "2026-05-11"
+  }
+}

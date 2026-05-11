@@ -47,12 +47,15 @@ def test_export_sfen_with_promoted_piece_and_hands() -> None:
 def test_export_kif_contains_position_board() -> None:
     text = export_kif(result(), side_to_move="white")
     assert "後手番" in text
-    assert "手数＝1" in text
+    assert "手合割：その他" in text
+    assert "手数＝" not in text
+    assert "   1 中断 ( 0:00/00:00:00)" in text
+    assert "まで1手で中断" in text
     assert "後手の持駒：なし" in text
     assert "先手の持駒：なし" in text
     assert "+---------------------------+" in text
     board_lines = [line for line in text.splitlines() if line.startswith("|")]
-    assert all(len(line.removeprefix("|").split("|")[0]) == 27 for line in board_lines)
+    assert all(len(line.removeprefix("|").split("|")[0].encode("cp932")) == 27 for line in board_lines)
 
 
 def test_export_rejects_unknown_cells() -> None:

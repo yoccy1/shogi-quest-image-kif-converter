@@ -79,7 +79,7 @@ TOTAL_INVENTORY = {
 
 HAND_ORDER = ("HI", "KA", "KI", "GI", "KE", "KY", "FU")
 BOARD_FILES = "９８７６５４３２１"
-KIF_EMPTY = " ・ "
+KIF_EMPTY = " ・"
 KANJI_NUMERALS = {
     1: "一",
     2: "二",
@@ -141,8 +141,9 @@ def export_kif(result: RecognitionResult, side_to_move: str = "black") -> str:
     white_hand = hands_to_kif(result.hands.get("white", {}))
     black_hand = hands_to_kif(result.hands.get("black", {}))
     lines = [
-        "#KIF version=2.0 encoding=UTF-8",
-        "手合割：平手",
+        "手合割：その他",
+        "先手：先手",
+        "後手：後手",
         f"後手の持駒：{white_hand}",
         "  ９ ８ ７ ６ ５ ４ ３ ２ １",
         "+---------------------------+",
@@ -156,12 +157,12 @@ def export_kif(result: RecognitionResult, side_to_move: str = "black") -> str:
             "+---------------------------+",
             f"先手の持駒：{black_hand}",
             "後手番" if side_to_move == "white" else "先手番",
-            "手数＝1",
             "手数----指手---------消費時間--",
-            "まで0手で中断",
+            "   1 中断 ( 0:00/00:00:00)",
+            "まで1手で中断",
         ]
     )
-    return "\n".join(lines) + "\n"
+    return "\r\n".join(lines) + "\r\n"
 
 
 def ensure_exportable(result: RecognitionResult) -> None:
@@ -257,7 +258,7 @@ def kif_cell(cell: str) -> str:
     color, piece = split_piece(cell)
     mark = "v" if color == "white" else " "
     text = PIECE_TO_BOD[piece]
-    return mark + text + " "
+    return mark + text
 
 
 def is_immobile(piece: str, color: str, row: int) -> bool:

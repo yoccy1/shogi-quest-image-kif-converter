@@ -1,0 +1,141 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/将棋クエスト/一文字駒/将棋クエスト_一文字駒_通常_51.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "empty",
+      "white:KE",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "white:NY",
+      "black:HI",
+      "empty",
+      "white:KI",
+      "white:KI",
+      "empty",
+      "empty",
+      "white:KA",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "white:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:OU",
+      "white:GI",
+      "empty",
+      "white:FU",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "white:KE",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "black:FU",
+      "empty",
+      "empty",
+      "black:FU",
+      "black:FU",
+      "black:FU",
+      "black:GI",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "black:KY",
+      "empty",
+      "black:KI",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "black:GI",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:OU"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 2,
+      "KY": 1,
+      "FU": 3
+    },
+    "white": {
+      "HI": 1,
+      "KA": 1,
+      "KI": 1,
+      "GI": 1,
+      "KE": 0,
+      "KY": 1,
+      "FU": 4
+    }
+  },
+  "app_name": "将棋クエスト",
+  "glyph_count": "one_character",
+  "glyph_count_label": "一文字",
+  "glyph_sort_source": "user_reviewed_2026-05-11",
+  "sample_kind": "regular",
+  "sample_kind_label": "通常",
+  "metadata": {
+    "piece_style": "一文字駒",
+    "review_source": "outputs/quest_onechar_requested_44_63_fix2/visual_review.html",
+    "review_assumption": "User confirmed all unmentioned cells and hands are correct; noted corrections were incorporated before labeling.",
+    "reviewed_at": "2026-05-11",
+    "inventory_reconciliation": [
+      "9? was set to white:NY and white hand GI restored so piece inventory remains complete while keeping the reviewed white KY count at 1."
+    ]
+  }
+}

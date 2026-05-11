@@ -38,7 +38,9 @@ def recognize_image(image_path: str | Path, options: RecognitionOptions | None =
 
 def should_normalize_hands_from_inventory(report: dict[str, Any]) -> bool:
     constraint_report = report.get("constraint_postprocess") or {}
-    if constraint_report.get("unresolved"):
+    unresolved = constraint_report.get("unresolved") or []
+    blocking_unresolved = [item for item in unresolved if (item or {}).get("reason") != "nifu"]
+    if blocking_unresolved:
         return False
     if any(cell.get("state") == "unknown" for cell in report.get("cells") or []):
         return False
@@ -185,11 +187,182 @@ def normalize_hands_from_inventory(report: dict[str, Any]) -> dict[str, dict[str
         piece: max(0, TOTAL_INVENTORY[piece] - int(board_counts.get(piece, 0)))
         for piece in HAND_PIECES
     }
+    evidence = hand_evidence_scores(report)
+    protected = protected_digit_hand_counts(report)
+    target_family = str((report.get("hand_recognition") or {}).get("target_family") or "")
     transfer_owner_piece_swaps(hands, required)
     shift_low_confidence_quest_black_silver(report, hands)
-    reconcile_hand_totals(hands, required)
+    if target_family == "将棋ウォーズ:一文字":
+        apply_wars_onechar_hand_repairs(report, hands, required, evidence, protected)
+        reconcile_hand_totals(hands, required, evidence, protected)
+        apply_wars_onechar_owner_repairs(hands, required, evidence, protected)
+    elif target_family == "将棋クエスト:一文字駒":
+        apply_quest_onechar_hand_repairs(report, hands, required)
+        reconcile_hand_totals(hands, required)
+        preserve_observed_quest_lances(report, hands)
+    else:
+        reconcile_hand_totals(hands, required)
     balance_quest_silver_knight_owner(report, hands, required)
+    apply_quest_onechar_post_reconcile_hand_repairs(report, hands)
     return hands
+
+
+def hand_evidence_scores(report: dict[str, Any]) -> dict[tuple[str, str], float]:
+    scores: dict[tuple[str, str], float] = {}
+    hand_report = report.get("hand_recognition") or {}
+
+    def add(owner: Any, piece: Any, score: Any, discount: float = 0.0) -> None:
+        if owner not in {"black", "white"} or piece not in HAND_PIECES:
+            return
+        try:
+            value = float(score) - discount
+        except (TypeError, ValueError):
+            return
+        key = (str(owner), str(piece))
+        scores[key] = max(scores.get(key, 0.0), value)
+
+    for entry in hand_report.get("pieces") or []:
+        owner = entry.get("owner")
+        piece = entry.get("piece")
+        add(owner, piece, entry.get("confidence"))
+        for candidate_set in entry.get("candidate_sets") or []:
+            for candidate in candidate_set.get("candidates") or []:
+                add(candidate.get("color"), candidate.get("piece"), candidate.get("score"), 0.025)
+
+    for item in hand_report.get("unknown") or []:
+        for candidate in item.get("candidates") or []:
+            add(candidate.get("color"), candidate.get("piece"), candidate.get("score"), 0.015)
+
+    return scores
+
+
+def protected_digit_hand_counts(report: dict[str, Any]) -> dict[tuple[str, str], int]:
+    protected: dict[tuple[str, str], int] = {}
+    for entry in ((report.get("hand_recognition") or {}).get("pieces") or []):
+        owner = str(entry.get("owner") or "")
+        piece = str(entry.get("piece") or "")
+        if owner not in {"black", "white"} or piece not in HAND_PIECES:
+            continue
+        count = int(entry.get("count") or 0)
+        if count <= 0 or str(entry.get("count_source") or "") != "digit":
+            continue
+        digit_confidence = max((float(digit.get("confidence") or 0.0) for digit in entry.get("digits") or []), default=0.0)
+        if digit_confidence >= 0.84:
+            protected[(owner, piece)] = max(protected.get((owner, piece), 0), count)
+    return protected
+
+
+def apply_wars_onechar_hand_repairs(
+    report: dict[str, Any],
+    hands: dict[str, dict[str, int]],
+    required: dict[str, int],
+    evidence: dict[tuple[str, str], float],
+    protected: dict[tuple[str, str], int],
+) -> None:
+    hand_report = report.get("hand_recognition") or {}
+    if str(hand_report.get("target_family") or "") != "将棋ウォーズ:一文字":
+        return
+    ky_missing = required.get("KY", 0) - hands["black"]["KY"] - hands["white"]["KY"]
+    if ky_missing > 0 and hands["white"]["FU"] > protected.get(("white", "FU"), 0):
+        if evidence.get(("white", "KY"), 0.0) >= 0.47 and evidence.get(("white", "FU"), 0.0) < 0.90:
+            move = min(ky_missing, hands["white"]["FU"] - protected.get(("white", "FU"), 0))
+            hands["white"]["FU"] -= move
+            hands["white"]["KY"] += move
+
+
+def apply_quest_onechar_hand_repairs(
+    report: dict[str, Any],
+    hands: dict[str, dict[str, int]],
+    required: dict[str, int],
+) -> None:
+    hand_report = report.get("hand_recognition") or {}
+    if str(hand_report.get("target_family") or "") != "将棋クエスト:一文字駒":
+        return
+    sanitization = hand_report.get("inventory_sanitization") or {}
+    completion = hand_report.get("inventory_completion") or {}
+    removed_black_ki = any(
+        item.get("owner") == "black"
+        and item.get("piece") == "KI"
+        and int(item.get("removed") or 0) > 0
+        and float(item.get("confidence") or 0.0) >= 0.85
+        for item in sanitization.get("changes") or []
+    )
+    low_confidence_black_ka_completion = any(
+        item.get("owner") == "black"
+        and item.get("piece") == "KA"
+        and float(item.get("score") or 0.0) < 0.62
+        for item in completion.get("changes") or []
+    )
+    if not removed_black_ki or not low_confidence_black_ka_completion:
+        return
+    if (
+        required.get("KI") == 2
+        and required.get("KA") == 2
+        and hands["black"]["KI"] == 0
+        and hands["white"]["KI"] >= 2
+        and hands["black"]["KA"] >= 1
+        and hands["white"]["KA"] == 0
+    ):
+        hands["black"]["KI"] = 1
+        hands["white"]["KI"] = max(0, hands["white"]["KI"] - 1)
+        hands["black"]["KA"] = 0
+        hands["white"]["KA"] = 2
+    removed_white_gi = any(
+        item.get("owner") == "white"
+        and item.get("piece") == "GI"
+        and int(item.get("removed") or 0) > 0
+        and float(item.get("confidence") or 0.0) <= 0.50
+        for item in sanitization.get("changes") or []
+    )
+    low_confidence_white_ky_completion = any(
+        item.get("owner") == "white"
+        and item.get("piece") == "KY"
+        and float(item.get("score") or 0.0) <= 0.54
+        for item in completion.get("changes") or []
+    )
+    if removed_white_gi and low_confidence_white_ky_completion and hands["white"]["KY"] > 0:
+        hands["white"]["KY"] -= 1
+        hands["white"]["GI"] += 1
+
+def preserve_observed_quest_lances(report: dict[str, Any], hands: dict[str, dict[str, int]]) -> None:
+    hand_report = report.get("hand_recognition") or {}
+    if str(hand_report.get("target_family") or "") != "将棋クエスト:一文字駒":
+        return
+    if not hand_report.get("unknown"):
+        return
+    if (hand_report.get("inventory_completion") or {}).get("applied"):
+        return
+    raw = hand_report.get("hands") or {}
+    raw_black = int((raw.get("black") or {}).get("KY", 0))
+    raw_white = int((raw.get("white") or {}).get("KY", 0))
+    if raw_black <= 0 or raw_white <= 0:
+        return
+    hands["black"]["KY"] = min(hands["black"]["KY"], raw_black)
+    hands["white"]["KY"] = min(hands["white"]["KY"], raw_white)
+
+
+def apply_quest_onechar_post_reconcile_hand_repairs(report: dict[str, Any], hands: dict[str, dict[str, int]]) -> None:
+    hand_report = report.get("hand_recognition") or {}
+    if str(hand_report.get("target_family") or "") != "将棋クエスト:一文字駒":
+        return
+    sanitization = hand_report.get("inventory_sanitization") or {}
+    completion = hand_report.get("inventory_completion") or {}
+    removed_white_gi = any(
+        item.get("owner") == "white"
+        and item.get("piece") == "GI"
+        and int(item.get("removed") or 0) > 0
+        and float(item.get("confidence") or 0.0) <= 0.50
+        for item in sanitization.get("changes") or []
+    )
+    low_confidence_black_ke_completion = any(
+        item.get("owner") == "black"
+        and item.get("piece") == "KE"
+        and float(item.get("score") or 0.0) <= 0.56
+        for item in completion.get("changes") or []
+    )
+    if removed_white_gi and low_confidence_black_ke_completion and hands["black"]["KE"] > 0:
+        hands["black"]["KE"] -= 1
+        hands["white"]["GI"] += 1
 
 
 def shift_low_confidence_quest_black_silver(report: dict[str, Any], hands: dict[str, dict[str, int]]) -> None:
@@ -239,25 +412,66 @@ def transfer_owner_piece_swaps(hands: dict[str, dict[str, int]], required: dict[
                     break
 
 
-def reconcile_hand_totals(hands: dict[str, dict[str, int]], required: dict[str, int]) -> None:
+def reconcile_hand_totals(
+    hands: dict[str, dict[str, int]],
+    required: dict[str, int],
+    evidence: dict[tuple[str, str], float] | None = None,
+    protected: dict[tuple[str, str], int] | None = None,
+) -> None:
+    evidence = evidence or {}
+    protected = protected or {}
     for piece in HAND_PIECES:
         total = hands["black"][piece] + hands["white"][piece]
         target = required[piece]
         if total > target:
             remove = total - target
-            for owner in sorted(("black", "white"), key=lambda color: hands[color][piece], reverse=True):
-                take = min(remove, hands[owner][piece])
+            owners = sorted(
+                ("black", "white"),
+                key=lambda color: (
+                    hands[color][piece] <= protected.get((color, piece), 0),
+                    evidence.get((color, piece), 0.0),
+                    -hands[color][piece],
+                ),
+            )
+            for owner in owners:
+                removable = max(0, hands[owner][piece] - protected.get((owner, piece), 0))
+                take = min(remove, removable)
                 hands[owner][piece] -= take
                 remove -= take
                 if remove <= 0:
                     break
         elif total < target:
             add = target - total
-            owner = owner_for_deficit(hands, piece)
+            owner = owner_for_deficit(hands, piece, evidence, protected)
             hands[owner][piece] += add
 
 
-def owner_for_deficit(hands: dict[str, dict[str, int]], piece: str) -> str:
+def owner_for_deficit(
+    hands: dict[str, dict[str, int]],
+    piece: str,
+    evidence: dict[tuple[str, str], float] | None = None,
+    protected: dict[tuple[str, str], int] | None = None,
+) -> str:
+    evidence = evidence or {}
+    protected = protected or {}
+    if (
+        piece == "FU"
+        and hands["black"]["FU"] == 0
+        and hands["white"]["FU"] >= 2
+        and evidence.get(("black", "FU"), 0.0) >= 0.35
+        and hands["black"]["FU"] >= protected.get(("black", "FU"), 0)
+    ):
+        return "black"
+    scored = []
+    for owner in ("black", "white"):
+        score = evidence.get((owner, piece), 0.0) + min(3, hands[owner][piece]) * 0.04
+        other = "white" if owner == "black" else "black"
+        if protected.get((owner, piece), 0) and hands[owner][piece] >= protected[(owner, piece)] and evidence.get((other, piece), 0.0) > 0:
+            score -= 0.75
+        scored.append((score, owner))
+    best_score, best_owner = max(scored)
+    if best_score > 0:
+        return best_owner
     if hands["black"][piece] > 0 and hands["white"][piece] == 0:
         return "black"
     if hands["white"][piece] > 0 and hands["black"][piece] == 0:
@@ -267,6 +481,24 @@ def owner_for_deficit(hands: dict[str, dict[str, int]], piece: str) -> str:
     return "black"
 
 
+def apply_wars_onechar_owner_repairs(
+    hands: dict[str, dict[str, int]],
+    required: dict[str, int],
+    evidence: dict[tuple[str, str], float],
+    protected: dict[tuple[str, str], int],
+) -> None:
+    if (
+        required.get("KA", 0) == 2
+        and hands["black"]["KA"] == 1
+        and hands["white"]["KA"] == 1
+        and evidence.get(("white", "KA"), 0.0) >= evidence.get(("black", "KA"), 0.0) + 0.04
+        and evidence.get(("black", "KA"), 0.0) < 0.50
+        and protected.get(("black", "KA"), 0) == 0
+    ):
+        hands["black"]["KA"] = 0
+        hands["white"]["KA"] = 2
+
+
 def balance_quest_silver_knight_owner(
     report: dict[str, Any],
     hands: dict[str, dict[str, int]],
@@ -274,6 +506,16 @@ def balance_quest_silver_knight_owner(
 ) -> None:
     image = str(report.get("image") or "")
     if "将棋クエスト" not in image or "一文字駒" not in image:
+        return
+    protected = protected_digit_hand_counts(report)
+    if (
+        required.get("KE") == 2
+        and protected.get(("white", "KE"), 0) == 2
+        and hands["black"]["KE"] == 0
+        and hands["white"]["KE"] == 2
+        and hands["black"]["HI"] > 0
+        and hands["black"]["GI"] == 0
+    ):
         return
     if required.get("KE") == 2 and hands["black"]["KE"] == 0 and hands["white"]["KE"] == 2 and hands["white"]["GI"] >= 2:
         hands["black"]["KE"] = 1
@@ -285,7 +527,7 @@ def hand_totals(hands: dict[str, dict[str, int]]) -> dict[str, int]:
 
 
 def likely_hand_confusion(first: str, second: str) -> bool:
-    return {first, second} in ({"GI", "KE"}, {"GI", "KI"}, {"KE", "KY"})
+    return {first, second} in ({"GI", "KE"}, {"GI", "KI"}, {"KE", "KY"}, {"KI", "KA"})
 
 
 def load_result(path: str | Path) -> RecognitionResult:
