@@ -8,7 +8,7 @@ Project page: https://saka996.github.io/shogi-quest-image-kif-converter/
 
 ## 画面イメージ
 
-![HTML UIの画面イメージ](docs/assets/html-ui-overview.svg)
+![実際のHTML UI画面](docs/assets/html-ui-actual.png)
 
 左に元画像、中央に認識結果、右にKIF/SFENが表示されます。盤面のマスや持ち駒をクリックすると、元画像のどの位置と対応しているか確認できます。
 
