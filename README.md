@@ -232,3 +232,136 @@ pip install -e ".[dev]"
 python -m py_compile src\shogi_gazo_desktop\cli.py src\shogi_gazo_desktop\recognition.py src\shogi_gazo_desktop\export.py
 python -m pytest tests
 ```
+
+# English Version
+
+`shogi-gazo-desktop` is a Windows-friendly Python tool that recognizes a shogi position from a screenshot and exports the result as JSON, SFEN, or KIF.
+
+The easiest way to use it is the local HTML UI. You select or paste a screenshot, compare the recognized board and captured pieces with the original image, then copy KIF or SFEN.
+
+## Quick Start For The HTML UI
+
+This bundled HTML UI is currently intended for Shogi Quest screenshots using the one-character piece style.
+
+### First-Time Setup
+
+1. On the GitHub page, click the green `Code` button.
+2. Click `Download ZIP`.
+3. Right-click the downloaded ZIP file and choose `Extract All`.
+4. Open the extracted folder. You are in the right place if you can see `start_kif_ui.cmd`.
+5. Right-click an empty area in that folder and choose `Open in Terminal` or `Open in PowerShell`.
+6. Paste the following command and press Enter.
+
+```powershell
+py -m pip install -e .
+```
+
+You only need to run this command once.
+
+The trained model for Shogi Quest one-character pieces is included at `models\shogi_quest_ichimonji_piece_model.pkl`, so you normally do not need to prepare a separate model.
+
+### Everyday Use
+
+1. Double-click `start_kif_ui.cmd`.
+2. When the browser opens, click `画像を選択` and choose a screenshot.
+3. If an image is already in your clipboard, you can also paste it with `Ctrl+V`.
+4. Compare the board, sente captured pieces, and gote captured pieces with the original image.
+5. If everything looks correct, copy KIF or SFEN.
+
+### How To Stop The UI
+
+1. Close the browser tab.
+2. Click the black command window opened by `start_kif_ui.cmd`.
+3. Press `Ctrl+C`.
+4. If Windows asks `Terminate batch job (Y/N)?`, press `Y` and then Enter.
+
+Closing only the browser tab does not stop the local image-analysis server. If you are unsure, it is also okay to close the black command window with the `X` button.
+
+If `start_kif_ui.cmd` shows an error such as `not recognized as an internal or external command`, you may be using an old startup file. Download the latest ZIP from GitHub and extract it again.
+
+## Supported Scope
+
+The HTML image-analysis UI is currently focused on the following input:
+
+- Shogi Quest screenshots using the one-character piece style.
+- Screenshots captured on a smartphone.
+- Verified device: Pixel 7a only.
+
+Other devices, themes, apps, cropped images, or low-quality images may still work, but they are outside the verified scope. Always check the board and captured pieces visually before importing the KIF/SFEN into another app.
+
+## Installation
+
+```powershell
+pip install .
+```
+
+Install the heavier ShogiVision dependencies only if you want to experiment with that optional integration.
+
+```powershell
+pip install ".[shogivision]"
+```
+
+If you want to run the source directly without installing it, set `PYTHONPATH` first.
+
+```powershell
+$env:PYTHONPATH = "src"
+python -m shogi_gazo_desktop.cli --help
+```
+
+## CLI Basics
+
+After installation, use the `shogi-gazo` command.
+
+```powershell
+shogi-gazo --help
+```
+
+### Train Or Rebuild A Model
+
+The Shogi Quest one-character model is already included. To rebuild it from the bundled images and labels, run:
+
+```powershell
+shogi-gazo train-model --screenshots-dir data\samples\screenshots_by_app_piece_style\将棋クエスト\一文字駒 --labels data\samples\labels\boards_by_app_piece_style\将棋クエスト\一文字駒 --out models\shogi_quest_ichimonji_piece_model.pkl --include-hands
+```
+
+### Recognize One Screenshot
+
+```powershell
+shogi-gazo recognize path\to\screenshot.png --model models\shogi_quest_ichimonji_piece_model.pkl --out outputs\sample_run --include-hands
+```
+
+The output JSON is written under `outputs\sample_run\<image name>\recognition.json`. A `piece_report.json` file is also written for HTML/debug review. If the result needs human review, the command exits with code `3`.
+
+### Export Recognition Results
+
+```powershell
+shogi-gazo export outputs\sample_run\<image name>\recognition.json --format kif --side-to-move black --out outputs\sample.kif
+shogi-gazo export outputs\sample_run\<image name>\recognition.json --format sfen --side-to-move black
+```
+
+KIF output is a position KIF/BOD file. It does not reconstruct the move history from a single screenshot. Export may fail when unknown cells, illegal inventory, duplicate pawns, king count issues, or unresolved board constraints remain.
+
+## Published Files
+
+The public repository includes the CLI, documentation, tests, Shogi Quest one-character training screenshots, labels, and the corresponding trained model.
+
+These folders are generally local development outputs and are not intended for public distribution, except for the Shogi Quest one-character screenshot folder and bundled model:
+
+- `data/samples/screenshots_by_app_piece_style/`
+- `reports/`
+- `outputs/`
+- `third_party/ShogiVision/`
+
+## Notes
+
+- If `needs_review` is set, check the position manually.
+- Screenshots outside the supported UI/style may be misrecognized.
+- KIF is for saving a position, not a full game record with move history.
+
+## Tests
+
+```powershell
+pip install -e ".[dev]"
+python -m py_compile src\shogi_gazo_desktop\cli.py src\shogi_gazo_desktop\recognition.py src\shogi_gazo_desktop\export.py
+python -m pytest tests
+```
