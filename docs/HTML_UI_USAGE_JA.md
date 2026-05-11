@@ -18,14 +18,10 @@
 pip install -e .
 ```
 
-3. `outputs\models\piece_model.pkl` に認識モデルを置きます。開発用のスクリーンショットデータを持っている場合は、次のコマンドで作成できます。
+3. `start_kif_ui.cmd` をダブルクリックします。
+4. ブラウザで `http://127.0.0.1:8765/` が開きます。
 
-```powershell
-shogi-gazo train-model --screenshots-dir data\samples\screenshots_by_app_piece_style --labels data\samples\labels\boards_by_app_piece_style --out outputs\models\piece_model.pkl --include-hands
-```
-
-4. 以後は `start_kif_ui.cmd` をダブルクリックします。
-5. ブラウザで `http://127.0.0.1:8765/` が開きます。
+将棋クエスト一文字駒向けの学習済みモデルは、`models\shogi_quest_ichimonji_piece_model.pkl` として同梱しています。`start_kif_ui.cmd` はこのモデルを使います。
 
 純粋なHTMLファイルだけでは、PC内のPython認識処理を直接実行できません。そのため、このリポジトリでは `start_kif_ui.cmd` がローカルサーバーを起動し、ブラウザ上のHTML UIを開く方式にしています。
 

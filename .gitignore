@@ -16,8 +16,17 @@ tools/out/
 *.pkl
 *.log
 
+# Public Quest one-character bundle used by the local HTML UI.
+!models/
+!models/shogi_quest_ichimonji_piece_model.pkl
+
 # Large/local datasets
-data/samples/screenshots_by_app_piece_style/
+data/samples/screenshots_by_app_piece_style/*
+!data/samples/screenshots_by_app_piece_style/将棋クエスト/
+data/samples/screenshots_by_app_piece_style/将棋クエスト/*
+!data/samples/screenshots_by_app_piece_style/将棋クエスト/一文字駒/
+data/samples/screenshots_by_app_piece_style/将棋クエスト/一文字駒/*
+!data/samples/screenshots_by_app_piece_style/将棋クエスト/一文字駒/*.png
 
 # Third-party local references and model weights.
 # Keep these locally until license/redistribution policy is confirmed.
