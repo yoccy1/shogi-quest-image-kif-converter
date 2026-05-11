@@ -22,7 +22,7 @@ if %ERRORLEVEL% EQU 0 (
   set "PYTHON_CMD=python"
 )
 
-echo Shogi Quest KIF Converter
+echo Shogi Quest Image KIF Converter
 echo.
 echo Browser will open: %UI_URL%
 echo To stop: press Ctrl+C in this window, then press Y and Enter.
