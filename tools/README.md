@@ -1,7 +1,5 @@
 # Development Tools
 
-> AI向けの全体文脈と最新QA方針は `AI_CONTEXT/README.md` と `AI_CONTEXT/DEVELOPMENT_AND_QA.md` に集約済みです。このファイルは `tools/` 固有の使い方メモとして残しています。古い記述が一部あるため、作業前に `AI_CONTEXT` 側も確認してください。
-
 These helpers are for local recognition experiments only. The Android app does not embed Python.
 
 ## Setup
