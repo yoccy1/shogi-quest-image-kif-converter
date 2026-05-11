@@ -29,6 +29,8 @@ echo To stop: press Ctrl+C in this window, then press Y and Enter.
 echo You can also close this black window with the X button.
 echo.
 
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$currentPid = $PID; Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessId -ne $currentPid -and ($_.CommandLine -like '*shogi_gazo_desktop.cli kif-ui*' -or $_.CommandLine -like '*serve_image_kif_ui*') } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; Start-Sleep -Milliseconds 500"
+
 start "" powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2; Start-Process '%UI_URL%'"
 %PYTHON_CMD% -m shogi_gazo_desktop.cli kif-ui --host 127.0.0.1 --port 8765 --out outputs\kif_ui --model "%MODEL%"
 

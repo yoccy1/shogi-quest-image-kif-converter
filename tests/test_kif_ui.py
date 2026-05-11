@@ -7,6 +7,7 @@ from PIL import Image
 from shogi_gazo_desktop._tools.serve_image_kif_ui import (
     compact_hand_recognition,
     decode_data_url,
+    export_edited_position,
     prepare_image_for_recognition,
     safe_upload_name,
 )
@@ -78,3 +79,20 @@ def test_compact_hand_recognition_preserves_rect_and_candidate() -> None:
     assert compact["areas"][0]["rect"] == [1.0, 2.0, 3.0, 4.0]
     assert compact["pieces"][0]["identity"] == "black:FU"
     assert compact["pieces"][0]["candidateSets"][0]["candidates"][0]["identity"] == "black:FU"
+
+
+def test_export_edited_position_uses_supplied_board_and_hands() -> None:
+    board = [["empty" for _ in range(9)] for _ in range(9)]
+    board[0][4] = "white:OU"
+    board[8][4] = "black:OU"
+    payload = {
+        "board": board,
+        "hands": {"black": {"FU": 2}},
+        "sideToMove": "white",
+    }
+
+    response = export_edited_position(payload)
+
+    assert response["ok"] is True
+    assert " w 2P " in response["export"]["sfen"]
+    assert "先手の持駒：歩二" in response["export"]["kif"]

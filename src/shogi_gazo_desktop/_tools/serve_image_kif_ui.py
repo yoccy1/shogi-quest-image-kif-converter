@@ -28,7 +28,7 @@ if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
 from shogi_gazo_desktop.export import ExportError, export_kif, export_sfen  # noqa: E402
-from shogi_gazo_desktop.models import HAND_PIECES, RecognitionOptions, RecognitionResult  # noqa: E402
+from shogi_gazo_desktop.models import HAND_PIECES, RecognitionOptions, RecognitionResult, empty_hands  # noqa: E402
 from shogi_gazo_desktop.paths import DEFAULT_LABELS_DIR, DEFAULT_MODEL_PATH, DEFAULT_OUTPUTS_DIR, DEFAULT_SCREENSHOTS_DIR  # noqa: E402
 from shogi_gazo_desktop.recognition import recognize_image  # noqa: E402
 
@@ -49,6 +49,12 @@ TARGET_HINTS = {
     "ぴよ将棋_ひよこ駒": "ぴよ将棋_ひよこ駒",
     "ぴよ将棋_一文字駒": "ぴよ将棋_一文字駒",
     "ぴよ将棋_二文字駒": "ぴよ将棋_二文字駒",
+}
+BOARD_PIECES = ("OU", "HI", "KA", "KI", "GI", "KE", "KY", "FU", "RY", "UM", "NG", "NK", "NY", "TO")
+BOARD_VALUES = {"empty", "unknown"} | {
+    f"{color}:{piece}"
+    for color in ("black", "white")
+    for piece in BOARD_PIECES
 }
 
 
@@ -336,6 +342,58 @@ def recognize_upload(payload: dict[str, Any], config: KifUiConfig) -> dict[str, 
     return response_from_result(result, side_to_move, time.perf_counter() - start)
 
 
+def normalize_board_payload(board_payload: Any) -> list[list[str]]:
+    if not isinstance(board_payload, list) or len(board_payload) != 9:
+        raise ValueError("board must be a 9x9 array")
+    board: list[list[str]] = []
+    for row in board_payload:
+        if not isinstance(row, list) or len(row) != 9:
+            raise ValueError("board must be a 9x9 array")
+        normalized_row = []
+        for cell in row:
+            value = str(cell or "empty")
+            if value not in BOARD_VALUES:
+                raise ValueError(f"unsupported board cell: {value}")
+            normalized_row.append(value)
+        board.append(normalized_row)
+    return board
+
+
+def normalize_hands_payload(hands_payload: Any) -> dict[str, dict[str, int]]:
+    hands = empty_hands()
+    if hands_payload is None:
+        return hands
+    if not isinstance(hands_payload, dict):
+        raise ValueError("hands must be an object")
+    for color in ("black", "white"):
+        raw_counts = hands_payload.get(color) or {}
+        if not isinstance(raw_counts, dict):
+            raise ValueError(f"hands.{color} must be an object")
+        for piece in HAND_PIECES:
+            try:
+                count = int(raw_counts.get(piece, 0))
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"invalid hand count: {color}:{piece}") from exc
+            if count < 0:
+                raise ValueError(f"negative hand count: {color}:{piece}")
+            hands[color][piece] = count
+    return hands
+
+
+def export_edited_position(payload: dict[str, Any]) -> dict[str, Any]:
+    side_to_move = str(payload.get("sideToMove") or "black")
+    if side_to_move not in {"black", "white"}:
+        raise ValueError("sideToMove must be black or white")
+    result = RecognitionResult(
+        image=str(payload.get("image") or ""),
+        board=normalize_board_payload(payload.get("board")),
+        hands=normalize_hands_payload(payload.get("hands")),
+        confidence=[],
+        raw_report={},
+    )
+    return {"ok": True, "export": export_payload(result, side_to_move)}
+
+
 def json_bytes(data: dict[str, Any]) -> bytes:
     return json.dumps(data, ensure_ascii=False).encode("utf-8")
 
@@ -354,7 +412,7 @@ def make_handler(config: KifUiConfig) -> type[BaseHTTPRequestHandler]:
             self.send_error(404)
 
         def do_POST(self) -> None:
-            if self.path != "/api/recognize":
+            if self.path not in {"/api/recognize", "/api/export"}:
                 self.send_error(404)
                 return
             try:
@@ -367,7 +425,10 @@ def make_handler(config: KifUiConfig) -> type[BaseHTTPRequestHandler]:
                 payload = json.loads(body.decode("utf-8"))
                 if not isinstance(payload, dict):
                     raise ValueError("request body must be a JSON object")
-                self.send_json(recognize_upload(payload, config))
+                if self.path == "/api/recognize":
+                    self.send_json(recognize_upload(payload, config))
+                else:
+                    self.send_json(export_edited_position(payload))
             except ValueError as exc:
                 self.send_json({"ok": False, "error": str(exc)}, status=400)
             except Exception as exc:
@@ -637,6 +698,36 @@ input[type=file], select {
   outline: 3px solid #111;
   z-index: 2;
 }
+.cell.editing {
+  outline: 3px solid var(--accent);
+  z-index: 3;
+}
+.piece {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 13px 2px 2px;
+}
+.piece-select {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 800;
+  text-align: center;
+  text-align-last: center;
+  padding: 13px 2px 2px;
+}
+.piece-select:focus {
+  outline: 0;
+}
+.cell.empty .piece-select {
+  color: rgba(51, 35, 19, 0.42);
+  font-weight: 700;
+}
 .hand-summary {
   margin: 5px 0;
 }
@@ -667,12 +758,11 @@ input[type=file], select {
   padding: 5px;
 }
 .hand-piece-tile {
-  min-height: 40px;
+  min-height: 52px;
   border: 1px solid #dfcfb4;
   border-radius: 7px;
   background: white;
   color: var(--ink);
-  appearance: none;
   cursor: pointer;
   padding: 4px;
   text-align: center;
@@ -700,91 +790,27 @@ input[type=file], select {
   font-weight: 900;
   line-height: 1;
 }
+.hand-count-input {
+  width: 100%;
+  min-height: 24px;
+  border: 1px solid #dfcfb4;
+  border-radius: 5px;
+  background: white;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+.hand-count-input:focus {
+  outline: 2px solid rgba(17, 108, 90, 0.35);
+  border-color: var(--accent);
+}
 .hand-piece-meta {
   margin-top: 2px;
   color: var(--muted);
   font-size: 10px;
   min-height: 12px;
-}
-.hand-list {
-  display: grid;
-  gap: 7px;
-  margin-top: 12px;
-}
-.hand-list-group {
-  display: grid;
-  gap: 7px;
-}
-.hand-list-group h3 {
-  margin: 4px 0 0;
-  font-size: 13px;
-}
-.hand-row {
-  width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: white;
-  color: var(--ink);
-  cursor: pointer;
-  padding: 7px 8px;
-  text-align: left;
-}
-.hand-row.selected {
-  outline: 3px solid rgba(255, 184, 77, 0.45);
-  border-color: #b06a00;
-}
-.hand-row-main {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-weight: 800;
-}
-.hand-row-sub {
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 3px;
-}
-.hand-empty {
-  color: var(--muted);
-  margin-top: 10px;
-}
-.paths {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-  margin-top: 10px;
-}
-.detail {
-  margin-top: 8px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: white;
-  overflow: hidden;
-}
-.detail-head {
-  padding: 8px;
-  background: #f8efdf;
-  font-weight: 800;
-  border-bottom: 1px solid var(--line);
-}
-.detail-body {
-  display: grid;
-  gap: 6px;
-  padding: 8px;
-  font-size: 13px;
-}
-.candidate {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 5px 7px;
-  background: #fffefb;
-}
-.candidate span {
-  color: var(--muted);
 }
 .actions {
   display: flex;
@@ -915,10 +941,13 @@ const PIECE_TEXT = {OU:"玉",HI:"飛",KA:"角",KI:"金",GI:"銀",KE:"桂",KY:"�
 const COLOR_MARK = {black:"▲", white:"△"};
 const COLOR_TEXT = {black:"先手", white:"後手"};
 const HAND_PIECES = ["HI","KA","KI","GI","KE","KY","FU"];
+const BOARD_PIECES = ["OU","HI","KA","KI","GI","KE","KY","FU","RY","UM","NG","NK","NY","TO"];
+const BOARD_VALUES = ["empty", ...BOARD_PIECES.map(piece => `black:${piece}`), ...BOARD_PIECES.map(piece => `white:${piece}`), "unknown"];
 const fileInput = document.getElementById("file");
 const pasteButton = document.getElementById("pasteButton");
 const runButton = document.getElementById("run");
 const scaleSelect = document.getElementById("scale");
+const sideSelect = document.getElementById("side");
 const targetHintSelect = document.getElementById("targetHint");
 const preview = document.getElementById("preview");
 const result = document.getElementById("result");
@@ -928,11 +957,17 @@ let currentExport = null;
 let imageObjectUrl = "";
 let lastData = null;
 let selectedSquare = null;
+let editingSquare = null;
 let selectedHandId = null;
 let selectedHandKey = null;
+let exportRequestId = 0;
 document.body.style.zoom = scaleSelect.value;
+targetHintSelect.value = "将棋クエスト_一文字駒";
 scaleSelect.addEventListener("change", () => {
   document.body.style.zoom = scaleSelect.value;
+});
+sideSelect.addEventListener("change", () => {
+  if (lastData) refreshExport(lastData);
 });
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
@@ -954,8 +989,25 @@ function ownerText(owner) {
 function handKey(owner, piece) {
   return owner && piece ? `${owner}:${piece}` : "";
 }
+function boardPieceLabel(value) {
+  if (!value || value === "empty") return "・";
+  if (value === "unknown") return "?";
+  return pieceText(value);
+}
+function boardPieceOptions(value) {
+  const current = BOARD_VALUES.includes(value) ? value : "unknown";
+  return BOARD_VALUES.map(option => (
+    `<option value="${esc(option)}" ${option === current ? "selected" : ""}>${esc(boardPieceLabel(option))}</option>`
+  )).join("");
+}
 function squareName(row, col) {
   return "987654321"[col - 1] + "一二三四五六七八九"[row - 1];
+}
+function squareCoords(square) {
+  const text = String(square || "");
+  const col = "987654321".indexOf(text[0]) + 1;
+  const row = "一二三四五六七八九".indexOf(text[1]) + 1;
+  return row > 0 && col > 0 ? {row, col} : null;
 }
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -984,7 +1036,9 @@ function setSelectedImage(file) {
   runButton.disabled = !selectedFile;
   currentExport = null;
   lastData = null;
+  exportRequestId += 1;
   selectedSquare = null;
+  editingSquare = null;
   selectedHandId = null;
   selectedHandKey = null;
   if (selectedFile) {
@@ -1039,7 +1093,7 @@ runButton.addEventListener("click", async () => {
       body: JSON.stringify({
         filename: selectedFile.name,
         dataUrl,
-        sideToMove: document.getElementById("side").value,
+        sideToMove: sideSelect.value,
         includeHands: document.getElementById("hands").checked,
         targetHint: targetHintSelect.value
       })
@@ -1048,6 +1102,7 @@ runButton.addEventListener("click", async () => {
     if (!data.ok) throw new Error(data.error || "recognition failed");
     lastData = data;
     selectedSquare = firstPieceSquare(data) || "5五";
+    editingSquare = null;
     selectedHandId = null;
     selectedHandKey = null;
     renderPreview(data);
@@ -1076,6 +1131,87 @@ function cellBySquare(data) {
 }
 function boardValue(data, row, col) {
   return data?.board?.[row - 1]?.[col - 1] || "empty";
+}
+function ensureBoardShape(data) {
+  if (!Array.isArray(data.board)) data.board = [];
+  for (let row = 0; row < 9; row++) {
+    if (!Array.isArray(data.board[row])) data.board[row] = [];
+    for (let col = 0; col < 9; col++) {
+      if (!data.board[row][col]) data.board[row][col] = "empty";
+    }
+  }
+}
+function ensureHandsShape(data) {
+  if (!data.hands || typeof data.hands !== "object") data.hands = {};
+  for (const color of ["black", "white"]) {
+    if (!data.hands[color] || typeof data.hands[color] !== "object") data.hands[color] = {};
+    for (const piece of HAND_PIECES) {
+      data.hands[color][piece] = Math.max(0, Number.parseInt(data.hands[color][piece] || 0, 10) || 0);
+    }
+  }
+}
+function markEdited(data) {
+  data.edited = true;
+}
+function updateCellMetadata(data, square, value) {
+  const coords = squareCoords(square);
+  if (!coords) return;
+  if (!Array.isArray(data.cells)) data.cells = [];
+  let cell = data.cells.find(item => item.square === square);
+  if (!cell) {
+    cell = {row: coords.row, col: coords.col, square};
+    data.cells.push(cell);
+  }
+  cell.state = value === "empty" ? "empty" : (value === "unknown" ? "unknown" : "piece");
+  cell.color = null;
+  cell.piece = null;
+  cell.identity = value;
+  cell.confidence = null;
+  cell.postprocessReason = "manual";
+  cell.candidates = [];
+  if (cell.state === "piece") {
+    const [color, piece] = value.split(":");
+    cell.color = color;
+    cell.piece = piece;
+  }
+}
+function setBoardValue(data, square, value) {
+  const coords = squareCoords(square);
+  if (!coords || !BOARD_VALUES.includes(value)) return;
+  ensureBoardShape(data);
+  data.board[coords.row - 1][coords.col - 1] = value;
+  updateCellMetadata(data, square, value);
+  markEdited(data);
+}
+function setHandCount(data, owner, piece, count) {
+  if (!["black", "white"].includes(owner) || !HAND_PIECES.includes(piece)) return;
+  ensureHandsShape(data);
+  data.hands[owner][piece] = Math.max(0, Number.parseInt(count, 10) || 0);
+  markEdited(data);
+}
+async function refreshExport(data) {
+  const requestId = ++exportRequestId;
+  try {
+    const response = await fetch("/api/export", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        image: data.image || "",
+        board: data.board,
+        hands: data.hands || {},
+        sideToMove: sideSelect.value
+      })
+    });
+    const payload = await response.json();
+    if (requestId !== exportRequestId) return;
+    if (!payload.ok) throw new Error(payload.error || "export failed");
+    data.export = payload.export || {};
+    renderExport(data);
+  } catch (error) {
+    if (requestId !== exportRequestId) return;
+    data.export = {error: String(error.message || error)};
+    renderExport(data);
+  }
 }
 function renderPreview(data) {
   if (!imageObjectUrl) {
@@ -1155,9 +1291,11 @@ function renderHandOverlay(data) {
   return chunks.join("");
 }
 function bindCompareClicks() {
-  document.querySelectorAll("[data-square]").forEach(element => {
-    element.addEventListener("click", () => {
+  document.querySelectorAll(".image-cell[data-square], .cell[data-square]").forEach(element => {
+    element.addEventListener("click", event => {
+      if (event.target.closest(".piece-select")) return;
       selectedSquare = element.dataset.square;
+      editingSquare = null;
       selectedHandId = null;
       selectedHandKey = null;
       if (lastData) {
@@ -1167,12 +1305,59 @@ function bindCompareClicks() {
     });
   });
 }
+function bindBoardEditors() {
+  document.querySelectorAll(".cell[data-square]").forEach(element => {
+    element.addEventListener("dblclick", event => {
+      event.preventDefault();
+      selectedSquare = element.dataset.square;
+      editingSquare = element.dataset.square;
+      selectedHandId = null;
+      selectedHandKey = null;
+      if (lastData) {
+        renderPreview(lastData);
+        renderResult(lastData);
+      }
+    });
+  });
+  document.querySelectorAll(".piece-select").forEach(element => {
+    element.addEventListener("focus", () => {
+      selectedSquare = element.dataset.square;
+      editingSquare = element.dataset.square;
+      selectedHandId = null;
+      selectedHandKey = null;
+      if (lastData) {
+        renderPreview(lastData);
+        updateSelectionClasses();
+      }
+    });
+    element.addEventListener("change", () => {
+      if (!lastData) return;
+      selectedSquare = element.dataset.square;
+      editingSquare = null;
+      selectedHandId = null;
+      selectedHandKey = null;
+      setBoardValue(lastData, element.dataset.square, element.value);
+      renderPreview(lastData);
+      renderResult(lastData);
+      refreshExport(lastData);
+    });
+    element.addEventListener("blur", () => {
+      if (!lastData || editingSquare !== element.dataset.square) return;
+      editingSquare = null;
+      renderResult(lastData);
+    });
+  });
+  const activeEditor = document.querySelector(".piece-select[data-editing='true']");
+  if (activeEditor) activeEditor.focus();
+}
 function bindHandClicks() {
   document.querySelectorAll("[data-hand]").forEach(element => {
-    element.addEventListener("click", () => {
+    element.addEventListener("click", event => {
+      if (event.target.closest(".hand-count-input")) return;
       selectedHandId = element.dataset.hand;
       selectedHandKey = element.dataset.handKey || null;
       selectedSquare = null;
+      editingSquare = null;
       if (lastData) {
         renderPreview(lastData);
         renderResult(lastData);
@@ -1181,15 +1366,54 @@ function bindHandClicks() {
   });
   document.querySelectorAll("[data-hand-key]").forEach(element => {
     if (element.dataset.hand) return;
-    element.addEventListener("click", () => {
+    element.addEventListener("click", event => {
+      if (event.target.closest(".hand-count-input")) return;
       selectedHandId = null;
       selectedHandKey = element.dataset.handKey;
       selectedSquare = null;
+      editingSquare = null;
       if (lastData) {
         renderPreview(lastData);
         renderResult(lastData);
       }
     });
+  });
+}
+function bindHandEditors() {
+  document.querySelectorAll(".hand-count-input").forEach(element => {
+    element.addEventListener("focus", () => {
+      selectedHandId = null;
+      selectedHandKey = handKey(element.dataset.owner, element.dataset.piece);
+      selectedSquare = null;
+      editingSquare = null;
+      if (lastData) {
+        renderPreview(lastData);
+        updateSelectionClasses();
+      }
+    });
+    element.addEventListener("change", () => {
+      if (!lastData) return;
+      selectedHandId = null;
+      selectedHandKey = handKey(element.dataset.owner, element.dataset.piece);
+      selectedSquare = null;
+      editingSquare = null;
+      setHandCount(lastData, element.dataset.owner, element.dataset.piece, element.value);
+      renderPreview(lastData);
+      renderResult(lastData);
+      refreshExport(lastData);
+    });
+  });
+}
+function updateSelectionClasses() {
+  document.querySelectorAll(".image-cell[data-square], .cell[data-square]").forEach(element => {
+    element.classList.toggle("selected", selectedSquare === element.dataset.square);
+  });
+  document.querySelectorAll("[data-hand]").forEach(element => {
+    element.classList.toggle("selected", selectedHandId === element.dataset.hand || Boolean(selectedHandKey && selectedHandKey === element.dataset.handKey));
+  });
+  document.querySelectorAll("[data-hand-key]").forEach(element => {
+    if (element.dataset.hand) return;
+    element.classList.toggle("selected", Boolean(selectedHandKey && selectedHandKey === element.dataset.handKey));
   });
 }
 function renderBoard(board) {
@@ -1198,9 +1422,13 @@ function renderBoard(board) {
     for (let col = 1; col <= 9; col++) {
       const value = board?.[row - 1]?.[col - 1] || "empty";
       const square = squareName(row, col);
+      const editing = editingSquare === square;
+      const body = editing
+        ? `<select class="piece-select" data-square="${square}" data-editing="true" aria-label="${square}の駒">${boardPieceOptions(value)}</select>`
+        : `<span class="piece">${esc(pieceText(value))}</span>`;
       cells.push(
-        `<button class="cell ${value === "empty" ? "empty" : ""} ${selectedSquare === square ? "selected" : ""}" data-square="${square}">` +
-        `<span class="sq">${square}</span><span class="piece">${esc(pieceText(value))}</span></button>`
+        `<div class="cell ${value === "empty" ? "empty" : ""} ${selectedSquare === square ? "selected" : ""} ${editing ? "editing" : ""}" data-square="${square}">` +
+        `<span class="sq">${square}</span>${body}</div>`
       );
     }
   }
@@ -1246,11 +1474,11 @@ function renderHandOwner(data, color) {
     if (selectedHandKey === key) classes.push("selected");
     const meta = item.crops ? `crop ${item.crops}${avg == null ? "" : ` / ${avg.toFixed(2)}`}` : "";
     return `
-      <button class="${classes.join(" ")}" data-hand-key="${esc(key)}" title="${esc(COLOR_TEXT[color])} ${esc(PIECE_TEXT[piece])}">
+      <div class="${classes.join(" ")}" data-hand-key="${esc(key)}" role="button" tabindex="0" title="${esc(COLOR_TEXT[color])} ${esc(PIECE_TEXT[piece])}">
         <div class="hand-piece-name">${esc(PIECE_TEXT[piece])}</div>
-        <div class="hand-piece-count">${count}</div>
+        <input class="hand-count-input" type="number" min="0" max="18" step="1" value="${count}" data-owner="${esc(color)}" data-piece="${esc(piece)}" aria-label="${esc(COLOR_TEXT[color])} ${esc(PIECE_TEXT[piece])}の枚数">
         <div class="hand-piece-meta">${esc(meta)}</div>
-      </button>`;
+      </div>`;
   }).join("");
   return `
     <div class="hand-summary">
@@ -1260,120 +1488,21 @@ function renderHandOwner(data, color) {
       </section>
     </div>`;
 }
-function renderHandRecognition(data) {
-  const items = handItems(data);
-  if (!items.length) return `<div class="hand-empty">持ち駒cropは検出されていません。</div>`;
-  const groups = ["black", "white"].map(color => {
-    const ownerItems = items.filter(item => item.owner === color);
-    if (!ownerItems.length) return "";
-    const rows = ownerItems.map(item => {
-      const label = item.unknown ? "?" : handPieceText(item.owner, item.piece, item.count);
-      const countSource = item.countSource ? ` / ${item.countSource}` : "";
-      const confidence = item.confidence == null ? "-" : Number(item.confidence).toFixed(4);
-      const key = handKey(item.owner, item.piece);
-      return `
-        <button class="hand-row ${selectedHandId === item.id || selectedHandKey === key ? "selected" : ""}" data-hand="${esc(item.id)}" data-hand-key="${esc(key)}">
-          <div class="hand-row-main"><span>${esc(label)}</span><span>${esc(confidence)}</span></div>
-          <div class="hand-row-sub">crop ${item.rectIndex != null ? item.rectIndex + 1 : "-"}${esc(countSource)}${item.ambiguous ? " / ambiguous" : ""}</div>
-        </button>`;
-    }).join("");
-    return `<section class="hand-list-group"><h3>${esc(COLOR_TEXT[color])}の検出crop</h3>${rows}</section>`;
-  }).join("");
-  const unknown = items.filter(item => item.owner !== "black" && item.owner !== "white");
-  const unknownRows = unknown.length
-    ? `<section class="hand-list-group"><h3>所有者不明</h3>${unknown.map(item => `
-        <button class="hand-row ${selectedHandId === item.id ? "selected" : ""}" data-hand="${esc(item.id)}">
-          <div class="hand-row-main"><span>?</span><span>-</span></div>
-          <div class="hand-row-sub">unknown</div>
-        </button>`).join("")}</section>`
-    : "";
-  return `<div class="hand-list">${groups}${unknownRows}</div>`;
-}
-function selectedHandItems(data) {
-  const items = handItems(data);
-  if (selectedHandId) return items.filter(item => item.id === selectedHandId);
-  if (selectedHandKey) return items.filter(item => handKey(item.owner, item.piece) === selectedHandKey);
-  return [];
-}
-function renderCellDetail(data) {
-  const selectedHands = selectedHandItems(data);
-  if (selectedHands.length) {
-    const hand = selectedHands[0];
-    const candidateSets = hand.candidateSets || [];
-    const candidates = candidateSets.length
-      ? candidateSets.map((set, setIndex) => (set.candidates || []).map((candidate, index) => (
-        `<div class="candidate"><b>${setIndex + 1}-${index + 1}. ${esc(pieceText(candidate.identity))}</b><span>${candidate.score == null ? "" : Number(candidate.score).toFixed(4)} ${esc(candidate.source || "")}</span></div>`
-      )).join("")).join("")
-      : ((hand.candidates || []).map((candidate, index) => (
-        `<div class="candidate"><b>${index + 1}. ${esc(pieceText(candidate.identity))}</b><span>${candidate.score == null ? "" : Number(candidate.score).toFixed(4)} ${esc(candidate.source || "")}</span></div>`
-      )).join("") || `<div class="empty">候補はありません。</div>`);
-    const digits = (hand.digits || []).length
-      ? (hand.digits || []).map(digit => `<div>数字: ${esc(digit.digit)} / 信頼度 ${digit.confidence == null ? "-" : Number(digit.confidence).toFixed(4)}</div>`).join("")
-      : "";
-    return `
-      <div class="detail">
-        <div class="detail-head">持ち駒 ${esc(ownerText(hand.owner))} ${esc(hand.unknown ? "?" : handPieceText(hand.owner, hand.piece, hand.count))}</div>
-        <div class="detail-body">
-          <div>対応crop: ${selectedHands.length}件</div>
-          <div>認識: ${esc(hand.unknown ? "unknown" : handPieceText(hand.owner, hand.piece, hand.count))}</div>
-          <div>枚数: ${esc(hand.count ?? "-")} / 根拠: ${esc(hand.countSource || "-")}</div>
-          <div>信頼度: ${hand.confidence == null ? "-" : Number(hand.confidence).toFixed(4)}</div>
-          ${digits}
-          ${candidates}
-        </div>
-      </div>`;
-  }
-  if (selectedHandKey) {
-    const [owner, piece] = selectedHandKey.split(":");
-    const count = Number((data.hands?.[owner] || {})[piece] || 0);
-    return `
-      <div class="detail">
-        <div class="detail-head">持ち駒 ${esc(ownerText(owner))} ${esc(PIECE_TEXT[piece] || piece)}</div>
-        <div class="detail-body">
-          <div>認識枚数: ${count}</div>
-          <div>対応する持ち駒cropは検出されていません。</div>
-        </div>
-      </div>`;
-  }
-  const map = cellBySquare(data);
-  const cell = map[selectedSquare] || null;
-  if (!cell) return `<div class="detail"><div class="detail-head">選択マス</div><div class="detail-body">マスをクリックすると詳細が出ます。</div></div>`;
-  const candidates = (cell.candidates || []).length
-    ? (cell.candidates || []).map((candidate, index) => (
-      `<div class="candidate"><b>${index + 1}. ${esc(pieceText(candidate.identity))}</b><span>${candidate.score == null ? "" : Number(candidate.score).toFixed(4)} ${esc(candidate.source || "")}</span></div>`
-    )).join("")
-    : `<div class="empty">候補はありません。</div>`;
-  return `
-    <div class="detail">
-      <div class="detail-head">${esc(cell.square)} ${esc(pieceText(cell.identity))}</div>
-      <div class="detail-body">
-        <div>信頼度: ${cell.confidence == null ? "-" : Number(cell.confidence).toFixed(4)}</div>
-        <div>状態: ${esc(cell.state || "-")}</div>
-        <div>補正: ${esc(cell.postprocessReason || "-")}</div>
-        ${candidates}
-      </div>
-    </div>`;
-}
 function renderResult(data) {
   const badges = [
     `<span class="badge ${data.needsReview ? "bad" : "ok"}">${data.needsReview ? "要確認" : "OK"}</span>`,
     `<span class="badge">${esc(data.elapsedSeconds)}秒</span>`
   ];
-  const reasons = (data.reviewReasons || []).map(reason => `<div class="error">${esc(reason)}</div>`).join("");
+  if (data.edited) badges.push(`<span class="badge">編集済み</span>`);
   result.innerHTML = `
     <div class="status">${badges.join("")}</div>
     ${renderHandOwner(data, "white")}
     ${renderBoard(data.board)}
-    ${renderHandOwner(data, "black")}
-    ${renderCellDetail(data)}
-    ${renderHandRecognition(data)}
-    ${reasons}
-    <div class="paths">
-      <div>recognition: ${esc(data.outputPath || "")}</div>
-      <div>report: ${esc(data.reportPath || "")}</div>
-    </div>`;
+    ${renderHandOwner(data, "black")}`;
   bindCompareClicks();
+  bindBoardEditors();
   bindHandClicks();
+  bindHandEditors();
 }
 function renderExport(data) {
   currentExport = data.export || {};
