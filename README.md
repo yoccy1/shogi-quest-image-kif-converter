@@ -6,6 +6,12 @@
 
 Project page: https://saka996.github.io/shogi-quest-image-kif-converter/
 
+## 画面イメージ
+
+![HTML UIの画面イメージ](docs/assets/html-ui-overview.svg)
+
+左に元画像、中央に認識結果、右にKIF/SFENが表示されます。盤面のマスや持ち駒をクリックすると、元画像のどの位置と対応しているか確認できます。
+
 ## はじめて使う手順（HTML UI）
 
 将棋クエスト一文字駒のスクリーンショットを、ブラウザ画面で確認しながらKIF/SFENに変換する手順です。Windowsでは `start_kif_ui.cmd` をダブルクリックして使います。

@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">将棋クエスト画像KIF変換 HTML UI overview</title>
+  <desc id="desc">The HTML UI has an input toolbar, original image panel, recognition result panel, and KIF/SFEN export panel.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f5f7fb; }
+      .panel { fill: #ffffff; stroke: #d6dde8; stroke-width: 2; }
+      .panel-title { fill: #1f2937; font: 700 24px "Segoe UI", "Yu Gothic", sans-serif; }
+      .text { fill: #374151; font: 500 18px "Segoe UI", "Yu Gothic", sans-serif; }
+      .small { fill: #4b5563; font: 500 15px "Segoe UI", "Yu Gothic", sans-serif; }
+      .label { fill: #0f5132; font: 700 18px "Segoe UI", "Yu Gothic", sans-serif; }
+      .button { fill: #1a73e8; }
+      .button-text { fill: #ffffff; font: 700 17px "Segoe UI", "Yu Gothic", sans-serif; }
+      .control { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; }
+      .board { fill: #f1b75e; stroke: #9b5a1e; stroke-width: 3; }
+      .grid { stroke: #b9792f; stroke-width: 1.5; }
+      .piece { fill: #ffe1a5; stroke: #8a4b16; stroke-width: 2; }
+      .piece-text { fill: #2b1a0b; font: 700 18px "Yu Gothic", "Segoe UI", sans-serif; text-anchor: middle; dominant-baseline: central; }
+      .highlight { fill: none; stroke: #1a73e8; stroke-width: 5; }
+      .hand { fill: #fff7e8; stroke: #d18a2d; stroke-width: 2; }
+      .export { fill: #fffefb; stroke: #d6dde8; stroke-width: 2; }
+      .callout { fill: #e8f3ee; stroke: #7dbd9f; stroke-width: 2; }
+      .arrow { stroke: #0f5132; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#0f5132"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1280" height="760"/>
+  <text x="52" y="58" class="panel-title">将棋クエスト画像KIF変換: HTML UIの見方</text>
+  <text x="52" y="88" class="text">画像を選ぶだけで、元画像・認識結果・KIF/SFENを同じ画面で確認できます。</text>
+
+  <rect class="panel" x="50" y="116" width="1180" height="86" rx="10"/>
+  <text x="75" y="149" class="label">1. 画像を入力</text>
+  <rect class="control" x="75" y="164" width="185" height="28" rx="5"/>
+  <text x="92" y="184" class="small">画像を選択</text>
+  <rect class="control" x="278" y="164" width="145" height="28" rx="5"/>
+  <text x="295" y="184" class="small">Ctrl+V / 貼付</text>
+  <text x="456" y="149" class="label">2. 条件を確認</text>
+  <rect class="control" x="456" y="164" width="145" height="28" rx="5"/>
+  <text x="474" y="184" class="small">先手番</text>
+  <rect class="control" x="620" y="164" width="220" height="28" rx="5"/>
+  <text x="638" y="184" class="small">将棋クエスト 一文字</text>
+  <rect class="control" x="858" y="164" width="86" height="28" rx="5"/>
+  <text x="882" y="184" class="small">70%</text>
+  <text x="980" y="149" class="label">3. 認識</text>
+  <rect class="button" x="980" y="160" width="205" height="34" rx="8"/>
+  <text x="1000" y="183" class="button-text">認識してKIF作成</text>
+
+  <rect class="panel" x="50" y="228" width="360" height="470" rx="10"/>
+  <text x="78" y="265" class="panel-title">画像</text>
+  <text x="78" y="292" class="small">元スクリーンショットを表示</text>
+  <rect x="92" y="322" width="276" height="330" rx="8" fill="#1f2937"/>
+  <rect class="board" x="125" y="370" width="210" height="210" rx="4"/>
+  <g>
+    <line class="grid" x1="148.3" y1="370" x2="148.3" y2="580"/>
+    <line class="grid" x1="171.7" y1="370" x2="171.7" y2="580"/>
+    <line class="grid" x1="195" y1="370" x2="195" y2="580"/>
+    <line class="grid" x1="218.3" y1="370" x2="218.3" y2="580"/>
+    <line class="grid" x1="241.7" y1="370" x2="241.7" y2="580"/>
+    <line class="grid" x1="265" y1="370" x2="265" y2="580"/>
+    <line class="grid" x1="288.3" y1="370" x2="288.3" y2="580"/>
+    <line class="grid" x1="311.7" y1="370" x2="311.7" y2="580"/>
+    <line class="grid" x1="125" y1="393.3" x2="335" y2="393.3"/>
+    <line class="grid" x1="125" y1="416.7" x2="335" y2="416.7"/>
+    <line class="grid" x1="125" y1="440" x2="335" y2="440"/>
+    <line class="grid" x1="125" y1="463.3" x2="335" y2="463.3"/>
+    <line class="grid" x1="125" y1="486.7" x2="335" y2="486.7"/>
+    <line class="grid" x1="125" y1="510" x2="335" y2="510"/>
+    <line class="grid" x1="125" y1="533.3" x2="335" y2="533.3"/>
+    <line class="grid" x1="125" y1="556.7" x2="335" y2="556.7"/>
+  </g>
+  <rect class="highlight" x="194" y="463" width="24" height="25" rx="3"/>
+  <rect class="hand" x="125" y="592" width="96" height="38" rx="7"/>
+  <text x="173" y="615" class="small" text-anchor="middle">先手持ち駒</text>
+  <rect class="hand" x="239" y="333" width="96" height="28" rx="7"/>
+  <text x="287" y="352" class="small" text-anchor="middle">後手持ち駒</text>
+
+  <rect class="panel" x="460" y="228" width="360" height="470" rx="10"/>
+  <text x="488" y="265" class="panel-title">認識結果</text>
+  <text x="488" y="292" class="small">盤面と持ち駒を目視確認</text>
+  <rect class="hand" x="540" y="320" width="200" height="44" rx="8"/>
+  <text x="640" y="348" class="text" text-anchor="middle">△角 △銀 △歩x3</text>
+  <rect class="board" x="525" y="386" width="230" height="230" rx="4"/>
+  <g>
+    <path class="grid" d="M550.6 386V616M576.1 386V616M601.7 386V616M627.2 386V616M652.8 386V616M678.3 386V616M703.9 386V616M729.4 386V616"/>
+    <path class="grid" d="M525 411.6H755M525 437.1H755M525 462.7H755M525 488.2H755M525 513.8H755M525 539.3H755M525 564.9H755M525 590.4H755"/>
+  </g>
+  <g>
+    <polygon class="piece" points="565,420 582,420 590,455 557,455"/>
+    <text class="piece-text" x="573.5" y="440">金</text>
+    <polygon class="piece" points="642,472 659,472 667,507 634,507"/>
+    <text class="piece-text" x="650.5" y="492">歩</text>
+    <polygon class="piece" points="615,548 632,548 640,583 607,583"/>
+    <text class="piece-text" x="623.5" y="568">玉</text>
+  </g>
+  <rect class="highlight" x="633" y="462" width="34" height="47" rx="4"/>
+  <rect class="hand" x="540" y="638" width="200" height="44" rx="8"/>
+  <text x="640" y="666" class="text" text-anchor="middle">▲金 ▲歩x2</text>
+
+  <rect class="panel" x="870" y="228" width="360" height="470" rx="10"/>
+  <text x="898" y="265" class="panel-title">KIF / SFEN</text>
+  <text x="898" y="292" class="small">確認後にコピーして別アプリへ</text>
+  <rect class="button" x="898" y="318" width="92" height="34" rx="7"/>
+  <text x="924" y="341" class="button-text">コピー</text>
+  <rect class="control" x="1004" y="318" width="118" height="34" rx="7"/>
+  <text x="1030" y="341" class="small">ダウンロード</text>
+  <rect class="export" x="898" y="372" width="292" height="210" rx="7"/>
+  <text x="918" y="407" class="small">#KIF version=2.0</text>
+  <text x="918" y="437" class="small">先手：先手</text>
+  <text x="918" y="467" class="small">後手：後手</text>
+  <text x="918" y="497" class="small">手合割：平手</text>
+  <text x="918" y="527" class="small">手数----指手---------</text>
+  <rect class="export" x="898" y="604" width="292" height="52" rx="7"/>
+  <text x="918" y="636" class="small">SFEN: 9/9/... b G2P 1</text>
+
+  <rect class="callout" x="82" y="668" width="268" height="48" rx="9"/>
+  <text x="216" y="699" class="label" text-anchor="middle">マスや持ち駒をクリック</text>
+  <path class="arrow" d="M350 690 C430 690 515 648 625 505"/>
+
+  <rect class="callout" x="488" y="668" width="306" height="48" rx="9"/>
+  <text x="641" y="699" class="label" text-anchor="middle">対応する画像位置が光ります</text>
+  <path class="arrow" d="M488 678 C380 662 295 604 210 478"/>
+
+  <rect class="callout" x="904" y="668" width="286" height="48" rx="9"/>
+  <text x="1047" y="699" class="label" text-anchor="middle">コピー後はボタン表示で確認</text>
+  <path class="arrow" d="M1032 668 C1000 622 962 554 944 356"/>
+</svg>
