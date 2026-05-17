@@ -1,0 +1,135 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/ぴよ将棋/一文字駒/ぴよ将棋_一文字駒_通常_35.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "black:GI",
+      "white:OU",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "black:NG",
+      "empty",
+      "white:KI",
+      "empty",
+      "empty",
+      "white:KI",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "black:UM",
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:FU"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "black:FU",
+      "black:GI",
+      "black:FU",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "black:FU",
+      "black:OU",
+      "empty",
+      "empty",
+      "black:FU",
+      "black:KE",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:KI",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:KY",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:HI",
+      "black:KY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 1,
+      "KI": 0,
+      "GI": 1,
+      "KE": 1,
+      "KY": 0,
+      "FU": 2
+    },
+    "white": {
+      "HI": 1,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 1,
+      "KY": 0,
+      "FU": 3
+    }
+  },
+  "label_source": "user_corrected_from_augmented_recognition",
+  "metadata": {
+    "piece_style": "一文字駒",
+    "created_from_run": "outputs/piyo_ichimonji_augmented_model",
+    "user_feedback_date": "2026-05-17",
+    "notes": [
+      "user confirmed correct"
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 from PIL import Image
@@ -18,7 +19,7 @@ def load_training_samples(
     calibration_dir: Path | None,
 ) -> list[tuple[str, Image.Image, object, list[dict]]]:
     samples = []
-    for label_path in sorted(labels_dir.rglob("*.json")):
+    for label_path in sorted(labels_dir.rglob("*.json"), key=training_label_sort_key):
         source = label_path.stem
         if source == exclude_sample:
             continue
@@ -44,6 +45,22 @@ def load_training_samples(
                 continue
             samples.append((source, image, detection, initial_position_cells()))
     return samples
+
+
+def training_label_sort_key(label_path: Path) -> tuple[int, str]:
+    try:
+        label = json.loads(label_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return (9, str(label_path))
+    metadata = label.get("metadata") if isinstance(label.get("metadata"), dict) else {}
+    label_source = str(label.get("label_source") or "")
+    if label_source == "user_corrected_from_augmented_recognition" or metadata.get("user_feedback_date"):
+        priority = 0
+    elif metadata.get("reviewed_at"):
+        priority = 1
+    else:
+        priority = 2
+    return (priority, str(label_path))
 
 
 def calibration_image_paths(calibration_dir: Path) -> list[Path]:

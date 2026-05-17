@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/ぴよ将棋/一文字駒/ぴよ将棋_一文字駒_通常_05.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:NY",
+      "white:NK",
+      "white:NG",
+      "white:KI",
+      "white:OU",
+      "white:KI",
+      "white:NG",
+      "white:NK",
+      "white:NY"
+    ],
+    [
+      "empty",
+      "white:RY",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:UM",
+      "empty"
+    ],
+    [
+      "white:TO",
+      "white:TO",
+      "white:TO",
+      "white:TO",
+      "white:TO",
+      "white:TO",
+      "white:TO",
+      "white:TO",
+      "white:TO"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "black:TO",
+      "black:TO",
+      "black:TO",
+      "black:TO",
+      "black:TO",
+      "black:TO",
+      "black:TO",
+      "black:TO",
+      "black:TO"
+    ],
+    [
+      "empty",
+      "black:KA",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:HI",
+      "empty"
+    ],
+    [
+      "black:NY",
+      "black:NK",
+      "black:NG",
+      "black:KI",
+      "black:OU",
+      "black:KI",
+      "black:NG",
+      "black:NK",
+      "black:NY"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 0
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 0
+    }
+  },
+  "metadata": {
+    "app_name": "ぴよ将棋",
+    "glyph_count": "one_character",
+    "glyph_count_label": "一文字",
+    "sample_kind": "regular",
+    "sample_kind_label": "通常",
+    "label_note": "User-provided promoted-piece label. 81 had both NK and RY in the instruction; interpreted RY as 82 because 82 is the rook square.",
+    "piece_style_sorted_from": "tools\\samples\\labels\\boards_by_app_glyph\\ぴよ将棋\\一文字\\ぴよ将棋_一文字_通常_05.json",
+    "piece_style": "一文字駒",
+    "previous_sample": "ぴよ将棋_ひよこ駒_通常_05",
+    "derived_from_label": "data/samples/labels/boards_by_app_piece_style/ぴよ将棋/ひよこ駒/ぴよ将棋_ひよこ駒_通常_05.json",
+    "derived_from_piece_style": "ひよこ駒"
+  },
+  "label_source": "derived_from_matching_piyo_hiyoko_position_label"
+}

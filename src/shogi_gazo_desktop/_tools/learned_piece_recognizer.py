@@ -67,7 +67,7 @@ from recognize_hand_pieces import (
 
 
 MODEL_VERSION = 3
-BOARD_TEMPLATE_LIMIT_PER_FAMILY_LABEL = 36
+BOARD_TEMPLATE_LIMIT_PER_FAMILY_LABEL = 512
 PROMOTED_RESCUE_PIECES = {"RY", "UM", "NG", "NK", "NY", "TO"}
 DEFAULT_HAND_CROP_CLASSIFIER_FAMILIES = {"将棋クエスト:クラシック二文字駒"}
 DEFAULT_HAND_TEMPLATE_TARGET_FAMILIES = {
@@ -598,16 +598,26 @@ def allow_incremental_inventory_completion(option: dict[str, Any], hand_report: 
 
 def hand_inventory_completion_options(hand_report: dict[str, Any], deficits: dict[str, int]) -> list[dict[str, Any]]:
     options: list[dict[str, Any]] = []
+    target_family = str(hand_report.get("target_family") or "")
     for item in hand_report.get("unknown") or []:
         rect = list(item.get("rect") or [])
         item_owner = str(item.get("owner") or "")
         for candidate in item.get("candidates") or []:
             score = float(candidate.get("score") or 0.0)
-            if score < 0.60:
-                continue
             owner = str(candidate.get("color") or "")
             piece = str(candidate.get("piece") or "")
             if owner not in {"black", "white"} or piece not in HAND_PIECES:
+                continue
+            min_score = 0.60
+            if (
+                target_family == "ぴよ将棋:一文字駒"
+                and item_owner in {"black", "white"}
+                and owner == item_owner
+                and piece in {"HI", "KA"}
+                and deficits.get(piece, 0) > 0
+            ):
+                min_score = 0.52
+            if score < min_score:
                 continue
             if item_owner in {"black", "white"} and owner != item_owner:
                 continue
@@ -1942,6 +1952,14 @@ def global_rerank_options(
             and current_score >= 0.74
             and score_drop > 0.075
             and not is_high_confidence_wars_inventory_swap(current_base, candidate_base, score_drop)
+        ):
+            continue
+        if (
+            target_family != "将棋ウォーズ:一文字"
+            and cell.get("state") == "piece"
+            and current_score >= 0.90
+            and score_drop > 0.08
+            and not current_in_nifu
         ):
             continue
         if candidate_score < min_score or score_drop > max_drop:

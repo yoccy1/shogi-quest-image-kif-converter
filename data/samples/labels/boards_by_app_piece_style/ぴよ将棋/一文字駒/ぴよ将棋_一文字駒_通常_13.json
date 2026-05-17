@@ -1,0 +1,136 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/ぴよ将棋/一文字駒/ぴよ将棋_一文字駒_通常_13.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "black:OU",
+      "black:KI",
+      "black:RY",
+      "black:TO",
+      "empty",
+      "empty",
+      "empty",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "white:KI",
+      "white:KI",
+      "white:OU",
+      "white:KY"
+    ],
+    [
+      "black:TO",
+      "black:KI",
+      "black:FU",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "empty",
+      "white:FU",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "white:GI",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:UM",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:UM",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:TO"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:NK",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 1,
+      "KA": 0,
+      "KI": 0,
+      "GI": 1,
+      "KE": 2,
+      "KY": 1,
+      "FU": 4
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 1,
+      "KE": 0,
+      "KY": 1,
+      "FU": 5
+    }
+  },
+  "metadata": {
+    "created_from": "tools\\out\\analysis_by_app_glyph_20260508\\ぴよ将棋\\一文字\\ぴよ将棋_一文字_通常_13\\piece_report.json",
+    "label_note": "Current recognition draft with user corrections for 12,26,58,61,65,71,81,83,93 and hands.",
+    "piece_style_sorted_from": "tools\\samples\\labels\\boards_by_app_glyph\\ぴよ将棋\\一文字\\ぴよ将棋_一文字_通常_13.json",
+    "piece_style": "一文字駒",
+    "previous_sample": "ぴよ将棋_ひよこ駒_通常_13",
+    "derived_from_label": "data/samples/labels/boards_by_app_piece_style/ぴよ将棋/ひよこ駒/ぴよ将棋_ひよこ駒_通常_13.json",
+    "derived_from_piece_style": "ひよこ駒"
+  },
+  "label_source": "derived_from_matching_piyo_hiyoko_position_label"
+}

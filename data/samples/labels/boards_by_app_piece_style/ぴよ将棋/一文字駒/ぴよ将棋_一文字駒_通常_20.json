@@ -1,0 +1,138 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/ぴよ将棋/一文字駒/ぴよ将棋_一文字駒_通常_20.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "black:OU",
+      "black:KI",
+      "black:RY",
+      "black:TO",
+      "empty",
+      "empty",
+      "empty",
+      "white:KE",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:GI",
+      "white:KI",
+      "white:KI",
+      "white:OU",
+      "white:KY"
+    ],
+    [
+      "black:TO",
+      "black:KI",
+      "black:FU",
+      "empty",
+      "white:FU",
+      "white:FU",
+      "empty",
+      "white:FU",
+      "empty"
+    ],
+    [
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:FU",
+      "white:GI",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "white:UM",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:UM",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:TO"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "white:NK",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 1,
+      "KA": 0,
+      "KI": 0,
+      "GI": 1,
+      "KE": 2,
+      "KY": 1,
+      "FU": 4
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 1,
+      "KE": 0,
+      "KY": 1,
+      "FU": 5
+    }
+  },
+  "label_source": "user_corrected_from_augmented_recognition",
+  "metadata": {
+    "piece_style": "一文字駒",
+    "created_from_run": "outputs/piyo_ichimonji_augmented_model",
+    "user_feedback_date": "2026-05-17",
+    "notes": [
+      "6-1=black TO",
+      "5-8=white NK (user wrote 59; interpreted from visible promoted knight)",
+      "1-2=white KY",
+      "black hand pieces from user feedback"
+    ]
+  }
+}

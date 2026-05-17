@@ -1,0 +1,147 @@
+{
+  "schema_version": 2,
+  "image": "../../../../screenshots_by_app_piece_style/ぴよ将棋/一文字駒/ぴよ将棋_一文字駒_通常_30.png",
+  "orientation": "black_bottom",
+  "rows": [
+    [
+      "white:KY",
+      "white:KE",
+      "empty",
+      "empty",
+      "empty",
+      "black:TO",
+      "empty",
+      "empty",
+      "white:KY"
+    ],
+    [
+      "empty",
+      "black:NG",
+      "white:KE",
+      "white:OU",
+      "empty",
+      "empty",
+      "empty",
+      "white:KI",
+      "empty"
+    ],
+    [
+      "empty",
+      "empty",
+      "white:FU",
+      "empty",
+      "white:FU",
+      "black:KA",
+      "white:GI",
+      "white:FU",
+      "empty"
+    ],
+    [
+      "empty",
+      "white:FU",
+      "empty",
+      "white:FU",
+      "white:KY",
+      "white:FU",
+      "white:FU",
+      "empty",
+      "white:FU"
+    ],
+    [
+      "white:FU",
+      "empty",
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "black:HI",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "empty",
+      "black:FU"
+    ],
+    [
+      "black:FU",
+      "black:FU",
+      "black:KE",
+      "black:FU",
+      "black:FU",
+      "empty",
+      "empty",
+      "empty",
+      "empty"
+    ],
+    [
+      "empty",
+      "black:OU",
+      "black:KI",
+      "empty",
+      "black:KI",
+      "empty",
+      "empty",
+      "white:RY",
+      "empty"
+    ],
+    [
+      "black:KY",
+      "empty",
+      "empty",
+      "white:GI",
+      "empty",
+      "empty",
+      "black:FU",
+      "empty",
+      "black:UM"
+    ]
+  ],
+  "hands": {
+    "black": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 0,
+      "GI": 1,
+      "KE": 1,
+      "KY": 0,
+      "FU": 0
+    },
+    "white": {
+      "HI": 0,
+      "KA": 0,
+      "KI": 1,
+      "GI": 0,
+      "KE": 0,
+      "KY": 0,
+      "FU": 1
+    }
+  },
+  "label_source": "user_corrected_from_augmented_recognition",
+  "metadata": {
+    "piece_style": "一文字駒",
+    "created_from_run": "outputs/piyo_ichimonji_augmented_model",
+    "user_feedback_date": "2026-05-17",
+    "notes": [
+      "8-6=black HI",
+      "8-7=black FU",
+      "7-7=black KE",
+      "5-4=white KY",
+      "5-8=black KI",
+      "4-1=black TO",
+      "4-3=black KA",
+      "4-4=white FU",
+      "3-3=white GI",
+      "2-8=white RY",
+      "1-9=black UM",
+      "all board changes are from explicit user feedback",
+      "hands preserved from inventory-compatible recognition"
+    ]
+  }
+}
