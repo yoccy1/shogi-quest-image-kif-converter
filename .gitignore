@@ -19,6 +19,7 @@ tools/out/
 # Public Quest one-character bundle used by the local HTML UI.
 !models/
 !models/shogi_quest_ichimonji_piece_model.pkl
+!models/piyo_ichimonji_piece_model.pkl
 
 # Large/local datasets
 data/samples/screenshots_by_app_piece_style/*

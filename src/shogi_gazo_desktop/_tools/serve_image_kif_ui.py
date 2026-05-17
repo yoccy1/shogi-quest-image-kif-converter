@@ -29,7 +29,13 @@ if src_path not in sys.path:
 
 from shogi_gazo_desktop.export import ExportError, export_kif, export_sfen  # noqa: E402
 from shogi_gazo_desktop.models import HAND_PIECES, RecognitionOptions, RecognitionResult, empty_hands  # noqa: E402
-from shogi_gazo_desktop.paths import DEFAULT_LABELS_DIR, DEFAULT_MODEL_PATH, DEFAULT_OUTPUTS_DIR, DEFAULT_SCREENSHOTS_DIR  # noqa: E402
+from shogi_gazo_desktop.paths import (  # noqa: E402
+    BUNDLED_MODEL_PATHS_BY_TARGET_HINT,
+    DEFAULT_KIF_UI_MODEL_PATH,
+    DEFAULT_LABELS_DIR,
+    DEFAULT_OUTPUTS_DIR,
+    DEFAULT_SCREENSHOTS_DIR,
+)
 from shogi_gazo_desktop.recognition import recognize_image  # noqa: E402
 
 
@@ -63,7 +69,7 @@ class KifUiConfig:
     host: str = "127.0.0.1"
     port: int = 8765
     out_dir: Path = DEFAULT_OUTPUTS_DIR / "kif_ui"
-    model_path: Path = DEFAULT_MODEL_PATH
+    model_path: Path | None = None
     screenshots_dir: Path = DEFAULT_SCREENSHOTS_DIR
     labels_dir: Path = DEFAULT_LABELS_DIR
     calibration_dir: Path | None = None
@@ -112,6 +118,12 @@ def prepare_image_for_recognition(image_path: Path) -> Path:
     upscaled = image_path.with_name(f"{image_path.stem}_upscaled{image_path.suffix}")
     resized.save(upscaled)
     return upscaled
+
+
+def model_path_for_target_hint(config: KifUiConfig, target_hint: str) -> Path:
+    if config.model_path is not None:
+        return config.model_path
+    return BUNDLED_MODEL_PATHS_BY_TARGET_HINT.get(target_hint, DEFAULT_KIF_UI_MODEL_PATH)
 
 
 def export_payload(result: RecognitionResult, side_to_move: str) -> dict[str, str]:
@@ -329,7 +341,7 @@ def recognize_upload(payload: dict[str, Any], config: KifUiConfig) -> dict[str, 
     recognition_image_path = prepare_image_for_recognition(image_path)
 
     options = RecognitionOptions(
-        model_path=config.model_path,
+        model_path=model_path_for_target_hint(config, target_hint),
         screenshots_dir=config.screenshots_dir,
         labels_dir=config.labels_dir,
         calibration_dir=config.calibration_dir or config.screenshots_dir,
@@ -1583,7 +1595,7 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUTPUTS_DIR / "kif_ui")
-    parser.add_argument("--model", type=Path, default=DEFAULT_MODEL_PATH)
+    parser.add_argument("--model", type=Path)
     parser.add_argument("--screenshots-dir", type=Path, default=DEFAULT_SCREENSHOTS_DIR)
     parser.add_argument("--labels", type=Path, default=DEFAULT_LABELS_DIR)
     parser.add_argument("--calibration-dir", type=Path)

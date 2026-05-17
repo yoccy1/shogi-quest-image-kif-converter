@@ -13,6 +13,14 @@ DEFAULT_SCREENSHOTS_DIR = DATA_DIR / "screenshots_by_app_piece_style"
 DEFAULT_LABELS_DIR = DATA_DIR / "labels" / "boards_by_app_piece_style"
 DEFAULT_OUTPUTS_DIR = ROOT / "outputs"
 DEFAULT_MODEL_PATH = DEFAULT_OUTPUTS_DIR / "models" / "piece_model.pkl"
+BUNDLED_MODELS_DIR = ROOT / "models"
+SHOGI_QUEST_ICHIMONJI_MODEL_PATH = BUNDLED_MODELS_DIR / "shogi_quest_ichimonji_piece_model.pkl"
+PIYO_ICHIMONJI_MODEL_PATH = BUNDLED_MODELS_DIR / "piyo_ichimonji_piece_model.pkl"
+DEFAULT_KIF_UI_MODEL_PATH = SHOGI_QUEST_ICHIMONJI_MODEL_PATH
+BUNDLED_MODEL_PATHS_BY_TARGET_HINT = {
+    "将棋クエスト_一文字駒": SHOGI_QUEST_ICHIMONJI_MODEL_PATH,
+    "ぴよ将棋_一文字駒": PIYO_ICHIMONJI_MODEL_PATH,
+}
 DEFAULT_BOARD_IMAGE = ROOT / "assets" / "legacy_drawables" / "shogi_board.png"
 DEFAULT_PIECES_IMAGE = ROOT / "assets" / "legacy_drawables" / "shogi_pieces.png"
 

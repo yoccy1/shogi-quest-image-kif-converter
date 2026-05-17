@@ -4,11 +4,21 @@ setlocal
 cd /d "%~dp0"
 set "PYTHONPATH=%CD%\src"
 set "UI_URL=http://127.0.0.1:8765/"
-set "MODEL=models\shogi_quest_ichimonji_piece_model.pkl"
+set "QUEST_MODEL=models\shogi_quest_ichimonji_piece_model.pkl"
+set "PIYO_MODEL=models\piyo_ichimonji_piece_model.pkl"
 
-if not exist "%MODEL%" (
+if not exist "%QUEST_MODEL%" (
   echo Model file was not found:
-  echo   %CD%\%MODEL%
+  echo   %CD%\%QUEST_MODEL%
+  echo.
+  echo Please download the latest repository files again.
+  pause
+  exit /b 1
+)
+
+if not exist "%PIYO_MODEL%" (
+  echo Model file was not found:
+  echo   %CD%\%PIYO_MODEL%
   echo.
   echo Please download the latest repository files again.
   pause
@@ -32,7 +42,7 @@ echo.
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$currentPid = $PID; Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessId -ne $currentPid -and ($_.CommandLine -like '*shogi_gazo_desktop.cli kif-ui*' -or $_.CommandLine -like '*serve_image_kif_ui*') } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; Start-Sleep -Milliseconds 500"
 
 start "" powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2; Start-Process '%UI_URL%'"
-%PYTHON_CMD% -m shogi_gazo_desktop.cli kif-ui --host 127.0.0.1 --port 8765 --out outputs\kif_ui --model "%MODEL%"
+%PYTHON_CMD% -m shogi_gazo_desktop.cli kif-ui --host 127.0.0.1 --port 8765 --out outputs\kif_ui
 
 if errorlevel 1 (
   echo.

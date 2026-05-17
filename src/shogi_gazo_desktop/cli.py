@@ -62,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
     kif_ui.add_argument("--host", default="127.0.0.1")
     kif_ui.add_argument("--port", type=int, default=8765)
     kif_ui.add_argument("--out", type=Path, default=DEFAULT_OUTPUTS_DIR / "kif_ui")
-    kif_ui.add_argument("--model", type=Path, default=DEFAULT_MODEL_PATH)
+    kif_ui.add_argument("--model", type=Path, help="Override the bundled model selected by recognition style.")
     kif_ui.add_argument("--screenshots-dir", type=Path, default=DEFAULT_SCREENSHOTS_DIR)
     kif_ui.add_argument("--labels", type=Path, default=DEFAULT_LABELS_DIR)
     kif_ui.add_argument("--calibration-dir", type=Path)

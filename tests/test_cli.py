@@ -3,7 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from shogi_gazo_desktop import cli
-from shogi_gazo_desktop.recognition import should_normalize_hands_from_inventory
+from shogi_gazo_desktop.models import HAND_PIECES, empty_hands
+from shogi_gazo_desktop.recognition import apply_piyo_onechar_hand_repairs, should_normalize_hands_from_inventory
 
 
 def test_validate_limit_accepts_positive_and_empty() -> None:
@@ -38,3 +39,27 @@ def test_hand_inventory_normalization_skips_unresolved_or_unknown_board() -> Non
     assert should_normalize_hands_from_inventory({"constraint_postprocess": {"unresolved": [{"reason": "nifu"}]}, "cells": []})
     assert not should_normalize_hands_from_inventory({"cells": [{"state": "unknown"}]})
     assert should_normalize_hands_from_inventory({"constraint_postprocess": {"unresolved": []}, "cells": [{"state": "empty"}]})
+
+
+def test_piyo_onechar_hand_repair_moves_unobserved_lance_to_white() -> None:
+    hands = empty_hands()
+    hands["black"]["KY"] = 2
+    required = {piece: 0 for piece in HAND_PIECES}
+    required["KY"] = 2
+    report = {
+        "hand_recognition": {
+            "target_family": "ぴよ将棋:一文字駒",
+            "hands": {"black": {"KY": 1}, "white": {"KY": 0}},
+        }
+    }
+
+    apply_piyo_onechar_hand_repairs(
+        report,
+        hands,
+        required,
+        evidence={("black", "KY"): 0.63, ("white", "KY"): 0.534},
+        protected={},
+    )
+
+    assert hands["black"]["KY"] == 1
+    assert hands["white"]["KY"] == 1

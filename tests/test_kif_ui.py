@@ -5,12 +5,15 @@ import base64
 from PIL import Image
 
 from shogi_gazo_desktop._tools.serve_image_kif_ui import (
+    KifUiConfig,
     compact_hand_recognition,
     decode_data_url,
     export_edited_position,
+    model_path_for_target_hint,
     prepare_image_for_recognition,
     safe_upload_name,
 )
+from shogi_gazo_desktop.paths import PIYO_ICHIMONJI_MODEL_PATH, SHOGI_QUEST_ICHIMONJI_MODEL_PATH
 
 
 def test_decode_data_url_accepts_png_payload() -> None:
@@ -41,6 +44,16 @@ def test_safe_upload_name_can_embed_target_hint() -> None:
     name = safe_upload_name("clipboard.png", "image/png", "将棋ウォーズ_一文字")
     assert "将棋ウォーズ_一文字" in name
     assert name.endswith("clipboard.png")
+
+
+def test_model_path_for_target_hint_uses_bundled_style_model() -> None:
+    assert model_path_for_target_hint(KifUiConfig(), "将棋クエスト_一文字駒") == SHOGI_QUEST_ICHIMONJI_MODEL_PATH
+    assert model_path_for_target_hint(KifUiConfig(), "ぴよ将棋_一文字駒") == PIYO_ICHIMONJI_MODEL_PATH
+
+
+def test_model_path_for_target_hint_respects_explicit_model(tmp_path) -> None:
+    custom_model = tmp_path / "custom.pkl"
+    assert model_path_for_target_hint(KifUiConfig(model_path=custom_model), "ぴよ将棋_一文字駒") == custom_model
 
 
 def test_prepare_image_for_recognition_upscales_small_image(tmp_path) -> None:

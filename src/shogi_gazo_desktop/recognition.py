@@ -200,6 +200,9 @@ def normalize_hands_from_inventory(report: dict[str, Any]) -> dict[str, dict[str
         apply_quest_onechar_hand_repairs(report, hands, required)
         reconcile_hand_totals(hands, required)
         preserve_observed_quest_lances(report, hands)
+    elif target_family == "ぴよ将棋:一文字駒":
+        reconcile_hand_totals(hands, required)
+        apply_piyo_onechar_hand_repairs(report, hands, required, evidence, protected)
     else:
         reconcile_hand_totals(hands, required)
     balance_quest_silver_knight_owner(report, hands, required)
@@ -363,6 +366,34 @@ def apply_quest_onechar_post_reconcile_hand_repairs(report: dict[str, Any], hand
     if removed_white_gi and low_confidence_black_ke_completion and hands["black"]["KE"] > 0:
         hands["black"]["KE"] -= 1
         hands["white"]["GI"] += 1
+
+
+def apply_piyo_onechar_hand_repairs(
+    report: dict[str, Any],
+    hands: dict[str, dict[str, int]],
+    required: dict[str, int],
+    evidence: dict[tuple[str, str], float],
+    protected: dict[tuple[str, str], int],
+) -> None:
+    hand_report = report.get("hand_recognition") or {}
+    if str(hand_report.get("target_family") or "") != "ぴよ将棋:一文字駒":
+        return
+    if hands["white"]["KY"] > 0 or hands["black"]["KY"] <= 0:
+        return
+    if evidence.get(("white", "KY"), 0.0) < 0.52:
+        return
+    raw_hands = hand_report.get("hands") or {}
+    raw_black_ky = int((raw_hands.get("black") or {}).get("KY") or 0)
+    preserved_black_ky = max(raw_black_ky, protected.get(("black", "KY"), 0))
+    movable = max(0, hands["black"]["KY"] - preserved_black_ky)
+    if movable <= 0:
+        return
+    white_target = max(0, required.get("KY", 0) - hands["white"]["KY"])
+    move = min(movable, white_target)
+    if move <= 0:
+        return
+    hands["black"]["KY"] -= move
+    hands["white"]["KY"] += move
 
 
 def shift_low_confidence_quest_black_silver(report: dict[str, Any], hands: dict[str, dict[str, int]]) -> None:
