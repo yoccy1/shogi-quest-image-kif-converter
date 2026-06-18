@@ -62,6 +62,7 @@ from recognize_hand_pieces import (
     piece_material_features,
     proposals_for_area,
     recognize_digit,
+    shoko_icon_proposals_for_area,
     suppress_duplicate_pieces,
 )
 
@@ -3166,7 +3167,10 @@ def recognize_hands(
     proposals = []
     digits = []
     for area in areas:
-        proposals.extend(proposals_for_area(image, area, cell_w, cell_h, max_proposals_per_area))
+        if target_family == "将皇" and area.side in {"top", "bottom"}:
+            proposals.extend(shoko_icon_proposals_for_area(image, area, cell_w, cell_h))
+        else:
+            proposals.extend(proposals_for_area(image, area, cell_w, cell_h, max_proposals_per_area))
         digits.extend(digit_candidates_for_area(image, area, cell_w, cell_h))
     model, templates = hand_classifier_assets(hand_assets)
     pieces, unknown = classify_hand_proposals(
