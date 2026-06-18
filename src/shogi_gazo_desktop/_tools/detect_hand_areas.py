@@ -260,6 +260,49 @@ def detect_hand_areas(image: Image.Image, detection: GridDetection | None) -> li
             components=[],
         )
 
+    # Outer band search: for wide-board (top/bottom) layouts, search strictly
+    # outside board_rect for hand pieces (handles tatami-style apps like Shoko where
+    # the real hand strip is above board_rect.top / below board_rect.bottom).
+    board = detection.board_rect
+    left_g, top_g, right_g, bottom_g = grid_rect(detection)
+    pad_x = int(cell_w * 0.25)
+    if board is not None and board.width >= image.width * 0.84:
+        outer_candidates: list[tuple[str, tuple[int, int, int, int]]] = []
+        if board.top < top_g:
+            outer_top = clip_rect(
+                (int(left_g - pad_x), max(0, board.top - int(cell_h * 1.5)),
+                 int(right_g + pad_x), board.top),
+                image.size,
+            )
+            if outer_top is not None:
+                outer_candidates.append(("top", outer_top))
+        if board.bottom > bottom_g:
+            outer_bottom = clip_rect(
+                (int(left_g - pad_x), board.bottom,
+                 int(right_g + pad_x), min(image.height, board.bottom + int(cell_h * 1.5))),
+                image.size,
+            )
+            if outer_bottom is not None:
+                outer_candidates.append(("bottom", outer_bottom))
+        for side, outer_rect in outer_candidates:
+            outer_components = detect_piece_color_components(image, outer_rect, cell_w, cell_h)
+            existing = areas.get(side)
+            if existing is None or existing.evidence == "board_gutter":
+                if outer_components:
+                    confidence = min(0.96, 0.62 + len(outer_components) * 0.10)
+                    evidence = "piece_color_components_outer"
+                else:
+                    confidence = 0.72
+                    evidence = "layout_outer"
+                areas[side] = HandArea(
+                    owner=SIDE_OWNER[side],
+                    side=side,
+                    rect=list(outer_rect),
+                    confidence=round(confidence, 4),
+                    evidence=evidence,
+                    components=outer_components,
+                )
+
     for side, rect in bands.items():
         if side in areas:
             continue
