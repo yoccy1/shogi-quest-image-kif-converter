@@ -3181,7 +3181,7 @@ def recognize_hands(
         ambiguous_margin=DEFAULT_AMBIGUOUS_MARGIN,
     )
     pieces = associate_digits(pieces, digits, cell_w, cell_h)
-    hands, piece_entries = aggregate_hands(pieces)
+    hands, piece_entries = aggregate_hands(pieces, use_icon_count=(target_family == "将皇"))
     apply_layout_hand_count_repairs(image, areas, hands, piece_entries, target_family, cell_w, cell_h)
     owner_flip = wars_side_hand_owner_flip(image, detection, target_family)
     if owner_flip.get("applied"):
