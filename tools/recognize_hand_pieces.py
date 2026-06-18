@@ -812,7 +812,7 @@ def associate_digits(
     return updated
 
 
-def aggregate_hands(pieces: Sequence[RecognizedHandPiece]) -> tuple[dict[str, dict[str, int]], list[dict]]:
+def aggregate_hands(pieces: Sequence[RecognizedHandPiece], use_icon_count: bool = False) -> tuple[dict[str, dict[str, int]], list[dict]]:
     hands = {
         "black": empty_hand_counts(),
         "white": empty_hand_counts(),
@@ -849,7 +849,13 @@ def aggregate_hands(pieces: Sequence[RecognizedHandPiece]) -> tuple[dict[str, di
 
     piece_entries = []
     for (owner, piece), entry in sorted(grouped.items(), key=lambda item: (item[0][0], HAND_PIECES.index(item[0][1]))):
-        hands[owner][piece] = int(entry["count"])
+        if use_icon_count:
+            count = len(entry["rects"])
+            entry["count_source"] = "icons"
+        else:
+            count = int(entry["count"])
+        hands[owner][piece] = count
+        entry["count"] = count
         entry["confidence"] = round(entry["confidence"], 4)
         piece_entries.append(entry)
     return hands, piece_entries
