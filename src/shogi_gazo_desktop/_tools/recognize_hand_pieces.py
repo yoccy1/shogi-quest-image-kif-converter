@@ -253,6 +253,39 @@ def proposals_for_area(
     return merged[:max_proposals]
 
 
+def shoko_icon_proposals_for_area(
+    image: Image.Image,
+    area: HandArea,
+    cell_w: float,
+    cell_h: float,
+) -> list[PieceProposal]:
+    ensure_opencv()
+    area_rect = tuple(area.rect)
+    area_left, area_top, area_right, area_bottom = area_rect
+    area_rgb = np.array(image.crop(area_rect).convert("RGB"))
+    proposals: list[PieceProposal] = []
+    for glyph_box in glyph_component_boxes(area_rgb, cell_w, cell_h):
+        glyph_w = glyph_box[2] - glyph_box[0]
+        glyph_h = glyph_box[3] - glyph_box[1]
+        if glyph_w < cell_w * 0.30 or glyph_w > cell_w * 0.80:
+            continue
+        if glyph_h < cell_h * 0.30 or glyph_h > cell_h * 0.55:
+            continue
+        local_cx = (glyph_box[0] + glyph_box[2]) / 2.0
+        local_cy = (glyph_box[1] + glyph_box[3]) / 2.0
+        global_rect = (
+            int(round(area_left + local_cx - cell_w / 2)),
+            int(round(area_top + local_cy - cell_h / 2)),
+            int(round(area_left + local_cx + cell_w / 2)),
+            int(round(area_top + local_cy + cell_h / 2)),
+        )
+        rect = clip_rect(global_rect, (area_left, area_top, area_right, area_bottom))
+        if rect is None:
+            continue
+        proposals.append(PieceProposal(rect=rect, source="shoko_icon", side=area.side, owner=area.owner))
+    return proposals
+
+
 def candidate_to_dict(candidate: Candidate) -> dict:
     return asdict(candidate)
 
