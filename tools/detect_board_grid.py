@@ -58,6 +58,7 @@ def is_board_pixel(rgb: tuple[int, int, int]) -> bool:
         red > 115
         and green > 85
         and blue < 175
+        and red >= green
         and red > blue * 1.20
         and green > blue * 1.08
         and abs(red - green) < 125
@@ -247,6 +248,7 @@ def board_pixel_mask(array: object) -> object:
         (red > 115)
         & (green > 85)
         & (blue < 175)
+        & (red >= green)
         & (red * 100 > blue * 120)
         & (green * 100 > blue * 108)
         & (np.abs(red - green) < 125)
