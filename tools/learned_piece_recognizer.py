@@ -1443,6 +1443,8 @@ def source_app(source: str) -> str:
         return "将棋ウォーズ"
     if "将棋クエスト" in source:
         return "将棋クエスト"
+    if "将皇" in source:
+        return "将皇"
     return ""
 
 
