@@ -287,13 +287,26 @@ def detect_hand_areas(image: Image.Image, detection: GridDetection | None) -> li
         for side, outer_rect in outer_candidates:
             outer_components = detect_piece_color_components(image, outer_rect, cell_w, cell_h)
             existing = areas.get(side)
-            if existing is None or existing.evidence == "board_gutter":
-                if outer_components:
-                    confidence = min(0.96, 0.62 + len(outer_components) * 0.10)
-                    evidence = "piece_color_components_outer"
-                else:
-                    confidence = 0.72
-                    evidence = "layout_outer"
+            # Determine if the existing board_gutter covers a thin gutter (column header)
+            # or a thick gutter (wooden strip). Only use layout_outer fallback for thin gutters.
+            if side == "top":
+                gutter_h = top_g - board.top
+            else:
+                gutter_h = board.bottom - bottom_g
+            thin_gutter = gutter_h < int(cell_h * 0.5)
+            if outer_components:
+                should_override = existing is None or existing.evidence == "board_gutter"
+                confidence = min(0.96, 0.62 + len(outer_components) * 0.10)
+                evidence = "piece_color_components_outer"
+            elif thin_gutter:
+                should_override = existing is None or existing.evidence == "board_gutter"
+                confidence = 0.72
+                evidence = "layout_outer"
+            else:
+                should_override = False
+                confidence = 0.0
+                evidence = ""
+            if should_override:
                 areas[side] = HandArea(
                     owner=SIDE_OWNER[side],
                     side=side,
